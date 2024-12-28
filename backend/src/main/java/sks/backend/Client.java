@@ -3,6 +3,7 @@ package sks.backend;
 import sks.backend.enums.ClientStatus;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,8 +25,13 @@ public class Client extends Thread {
 
     @Override
     public void run() {
-        System.out.println(this);
         joinQueue();
+        System.out.println("\u001B[34m" + this + "\u001B[0m");
+        try {
+            this.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -37,17 +43,33 @@ public class Client extends Thread {
                 '}';
     }
 
-    private boolean joinQueue() {
-        resources.lock.lock();
+    private void joinQueue() {
+        CanteenManager.lock.lock();
         try {
             Line shortestLine = findShorterLine(resources.getLines());
-            return shortestLine.addClient(this);
+            System.out.println("\u001B[31mClient id: " + id + " joined " + shortestLine.getName() + "\u001B[0m");
+            Thread.sleep(2000);
+            shortestLine.addClient(this);
+            this.status = ClientStatus.IN_QUEUE;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         } finally {
-            resources.lock.unlock();
+            CanteenManager.lock.unlock();
         }
     }
 
-    private Line findShorterLine(Set<Line> lines) {
-        return lines.stream().min(Comparator.comparingInt(Line::getSize)).orElseThrow();
+    public void setStatus(ClientStatus status) {
+        this.status = status;
+    }
+
+    private Line findShorterLine(List<Line> lines) {
+        lines.forEach(line -> System.out.println("Line: " + line.getName() + ", Size: " + line.getSize()));
+        return lines.stream()
+                .min(Comparator.comparingInt(Line::getSize))
+                .orElseThrow();
+    }
+
+    public int id() {
+        return id;
     }
 }

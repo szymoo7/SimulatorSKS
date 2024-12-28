@@ -1,6 +1,7 @@
 package sks.backend;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -8,42 +9,46 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class CanteenManager {
 
-    private volatile List<Client> clients = new ArrayList<>();
-    private volatile List<Table> tables = new ArrayList<>(8);
-    private volatile Set<Line> lines;
-    private volatile Set<Counter> counters;
-    public Lock lock;
+    static volatile List<Client> clients = new ArrayList<>();
+    static volatile List<Table> tables = new ArrayList<>(8);
+    static volatile List<Line> lines = new ArrayList<>() {
+        {
+            add(new Line("Kolejka 1"));
+            add(new Line("Kolejka 2"));
+        }
+    };
+    static volatile Set<Counter> counters;
+    static Lock lock = new ReentrantLock(true);
 
     public CanteenManager(int clientsPerSec, int nSeats) {
         for(int i = 0; i < 8; i++) {
             tables.add(new Table(nSeats));
         }
-        this.lock = new ReentrantLock(true);
     }
 
-    public void start() {
+    public void startSimulation() throws InterruptedException {
 
-        for(int i = 0; i < 100; i++) {
-            clients.add(new Client(this));
+        for (int i = 0; i < 2; i++) {
+            new Cook(lines.get(i), 1).start();
         }
 
-        for(Client client : clients) {
-            try {
-                Thread.sleep(1000);
-                client.start();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        for(int i = 0; i < 10; i++) {
+            //Thread.sleep(2000);
+            Client c = new Client(this);
+            clients.add(c);
+            c.start();
+
         }
+
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         CanteenManager canteenManager = new CanteenManager(1, 4);
-        canteenManager.start();
+        canteenManager.startSimulation();
     }
 
 
-    public Set<Line> getLines() {
+    public List<Line> getLines() {
         return lines;
     }
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: #03120E;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.gui.frontend.SKSScene">
+   <children>
+      <AnchorPane layoutX="20.0" layoutY="50.0" prefHeight="976.0" prefWidth="1600.0" style="-fx-border-color: #C3C3C3;" />
+   </children>
+</AnchorPane>

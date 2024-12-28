@@ -1,4 +1,10 @@
 package sks.backend;
 
-public class Cook {
+public class Cook extends Thread {
+
+    @Override
+    public void run() {
+
+    }
+
 }

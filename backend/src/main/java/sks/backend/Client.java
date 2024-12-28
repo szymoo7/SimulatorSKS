@@ -1,17 +1,17 @@
 package sks.backend;
 
 import sks.backend.enums.ClientStatus;
+import sks.backend.enums.Dishes;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Client extends Thread {
 
-    private static Random random = new Random();
-    private static AtomicInteger idCreator = new AtomicInteger(0);
+    private static final Random random = new Random();
+    private static final AtomicInteger idCreator = new AtomicInteger(0);
     private final int id;
     private String order;
     private ClientStatus status;
@@ -51,6 +51,22 @@ public class Client extends Thread {
             Thread.sleep(2000);
             shortestLine.addClient(this);
             this.status = ClientStatus.IN_QUEUE;
+            selectOrder();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            CanteenManager.lock.unlock();
+        }
+    }
+
+    private void goToCounter() {
+        CanteenManager.lock.lock();
+        try {
+            Line shortestLine = findShorterLine(resources.getToPayLines());
+            System.out.println("\u001B[31mClient id: " + id + " is waiting to pay in " + shortestLine.getName() + "\u001B[0m");
+            Thread.sleep(2000);
+            shortestLine.addClient(this);
+            this.status = ClientStatus.IN_QUEUE;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } finally {
@@ -71,5 +87,9 @@ public class Client extends Thread {
 
     public int id() {
         return id;
+    }
+
+    private void selectOrder() {
+        this.order = Dishes.values()[random.nextInt(Dishes.values().length)].name();
     }
 }

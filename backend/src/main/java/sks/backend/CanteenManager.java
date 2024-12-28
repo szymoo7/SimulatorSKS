@@ -17,6 +17,12 @@ public class CanteenManager {
             add(new Line("Kolejka 2"));
         }
     };
+    static volatile List<Line> toPayLines = new ArrayList<>() {
+        {
+            add(new Line("Kolejka do kasy 1"));
+            add(new Line("Kolejka do kasy 2"));
+        }
+    };
     static volatile Set<Counter> counters;
     static Lock lock = new ReentrantLock(true);
 
@@ -50,5 +56,9 @@ public class CanteenManager {
 
     public List<Line> getLines() {
         return lines;
+    }
+
+    public List<Line> getToPayLines() {
+        return toPayLines;
     }
 }

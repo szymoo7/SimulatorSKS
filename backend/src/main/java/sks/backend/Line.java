@@ -4,7 +4,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Line {
-    private String name;
+    private final String name;
     private final Queue<Client> clientsInLine;
 
     public Line(String name) {
@@ -16,8 +16,8 @@ public class Line {
         return clientsInLine.size();
     }
 
-    public boolean addClient(Client client) {
-        return clientsInLine.add(client);
+    public void addClient(Client client) {
+        clientsInLine.add(client);
     }
 
     public Client pollClient() {

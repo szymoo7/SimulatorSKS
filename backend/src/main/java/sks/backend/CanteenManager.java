@@ -10,25 +10,24 @@ import java.util.concurrent.locks.ReentrantLock;
 public class CanteenManager {
 
     static volatile List<Client> clients = new ArrayList<>();
-    static volatile List<Table> tables = new ArrayList<>(8);
+    static volatile List<Table> tables = new ArrayList<>();
     static volatile List<Line> lines = new ArrayList<>() {
         {
             add(new Line("Kolejka 1"));
             add(new Line("Kolejka 2"));
         }
     };
-    static volatile List<Line> toPayLines = new ArrayList<>() {
+    static volatile List<Counter> counters = new ArrayList<>() {
         {
-            add(new Line("Kolejka do kasy 1"));
-            add(new Line("Kolejka do kasy 2"));
+            add(new Counter(true, new Line("Kolejka do kasy 1")));
+            add(new Counter(false, new Line("Kolejka do kasy 2")));
         }
     };
-    static volatile Set<Counter> counters;
-    static Lock lock = new ReentrantLock(true);
+
 
     public CanteenManager(int clientsPerSec, int nSeats) {
         for(int i = 0; i < 8; i++) {
-            tables.add(new Table(nSeats));
+            tables.add(new Table(nSeats, i));
         }
     }
 
@@ -38,18 +37,19 @@ public class CanteenManager {
             new Cook(lines.get(i), 1).start();
         }
 
-        for(int i = 0; i < 10; i++) {
-            //Thread.sleep(2000);
+        counters.get(0).start();
+
+        for(int i = 0; i < 250; i++) {
             Client c = new Client(this);
             clients.add(c);
             c.start();
-
+            Thread.sleep(2500);
         }
 
     }
 
     public static void main(String[] args) throws InterruptedException {
-        CanteenManager canteenManager = new CanteenManager(1, 4);
+        CanteenManager canteenManager = new CanteenManager(1, 1);
         canteenManager.startSimulation();
     }
 
@@ -59,6 +59,10 @@ public class CanteenManager {
     }
 
     public List<Line> getToPayLines() {
-        return toPayLines;
+        return counters.stream().filter(Counter::isOpen).map(Counter::getToPayLine).toList();
+    }
+
+    public List<Table> getTables() {
+        return tables;
     }
 }

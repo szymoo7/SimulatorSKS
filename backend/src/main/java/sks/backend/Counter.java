@@ -1,12 +1,43 @@
 package sks.backend;
 
-public class Counter {
+public class Counter extends Thread {
     private boolean isOpen;
-    private Line toPayLine = new Line("Kasa 1");
+    private final Line toPayLine;
+    private Cashier cashier;
 
-    public Counter(boolean isOpen) {
+    public Counter(boolean isOpen, Line toPayLine) {
         this.isOpen = isOpen;
+        this.toPayLine = toPayLine;
+        this.cashier = new Cashier(toPayLine);
+    }
+
+    public void run() {
+        while (true) {
+            if (isOpen) {
+                if (!cashier.isAlive()) {
+                    cashier = new Cashier(toPayLine);
+                    cashier.start();
+                }
+            } else {
+                if (cashier.isAlive()) {
+                    cashier.interrupt();
+                }
+            }
+            try {
+                Thread.sleep(100); // Check the flag every 100ms
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
     }
 
 
+    public boolean isOpen() {
+        return isOpen;
+    }
+
+    public Line getToPayLine() {
+        return toPayLine;
+    }
 }

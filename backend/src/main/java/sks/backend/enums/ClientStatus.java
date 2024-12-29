@@ -4,7 +4,9 @@ public enum ClientStatus {
     ENTERING,
     IN_QUEUE,
     ORDERING,
+    IN_QUEUE_TO_PAY,
     PAYING,
+    LOOKING_FOR_SEAT,
     EATING,
     EXITING
 }

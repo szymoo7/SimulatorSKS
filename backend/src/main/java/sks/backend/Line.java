@@ -17,14 +17,19 @@ public class Line {
     }
 
     public void addClient(Client client) {
+        System.out.println("\u001B[31mClient id: " + client.id() + " joined " + name + "\u001B[0m");
         clientsInLine.add(client);
     }
 
-    public Client pollClient() {
-        return clientsInLine.poll();
+    public Client peekClient() {
+        return clientsInLine.peek();
     }
 
     public String getName() {
         return name;
+    }
+
+    public void removeClient() {
+        clientsInLine.remove();
     }
 }

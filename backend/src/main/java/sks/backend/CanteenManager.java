@@ -24,11 +24,17 @@ public class CanteenManager {
         }
     };
 
+    private double simulationSpeed = 1;
+    private int nSeats = 1;
+
 
     public CanteenManager(int clientsPerSec, int nSeats) {
         for(int i = 0; i < 8; i++) {
             tables.add(new Table(nSeats, i));
         }
+    }
+
+    public CanteenManager() {
     }
 
     public void startSimulation() throws InterruptedException {
@@ -64,5 +70,13 @@ public class CanteenManager {
 
     public List<Table> getTables() {
         return tables;
+    }
+
+    public void setSimulationSpeed(int i) {
+        this.simulationSpeed = i;
+    }
+
+    public void setNSeats(int i) {
+        this.nSeats = i;
     }
 }

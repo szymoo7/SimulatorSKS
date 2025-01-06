@@ -4,10 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.gui</groupId>
+  <parent>
+    <groupId>org.example</groupId>
+    <artifactId>SimulatorSKS</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
   <artifactId>frontend</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <name>frontend</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -36,7 +38,14 @@
       <artifactId>junit-jupiter-engine</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
-    </dependency>  </dependencies>
+    </dependency>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>backend</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>

@@ -1,10 +1,519 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
 
-
-<AnchorPane prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: #03120E;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.gui.frontend.SKSScene">
+<AnchorPane fx:id="mainAnchorPane" prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: #B63838;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sks.frontend.SKSceneManager">
    <children>
-      <AnchorPane layoutX="20.0" layoutY="50.0" prefHeight="976.0" prefWidth="1600.0" style="-fx-border-color: #C3C3C3;" />
+      <Label layoutX="1513.0" layoutY="214.0" text="Liczba rzędów krzeseł przy stole">
+         <font>
+            <Font name="Courier New" size="20.0" />
+         </font>
+      </Label>
+      <Label layoutX="1596.0" layoutY="152.0" text="Prędkość symulacji">
+         <font>
+            <Font name="Courier New" size="20.0" />
+         </font>
+      </Label>
+      <Slider fx:id="simulationSpeedSlider" layoutX="1552.0" layoutY="187.0" prefHeight="14.0" prefWidth="306.0" />
+      <Slider fx:id="simulationNChairsSlider" blockIncrement="1.0" layoutX="1553.0" layoutY="248.0" majorTickUnit="1.0" max="4.0" min="1.0" minorTickCount="0" prefHeight="14.0" prefWidth="306.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
+      <Label fx:id="simulationSettingsLabel" layoutX="1617.0" layoutY="83.0" prefHeight="46.0" prefWidth="175.0" text="Ustawienia" textAlignment="CENTER">
+         <font>
+            <Font name="Consolas Bold" size="31.0" />
+         </font>
+      </Label>
+      <AnchorPane fx:id="canteenAnchorPane" layoutX="21.0" layoutY="28.0" prefHeight="1024.0" prefWidth="1454.0" style="-fx-border-color: #000000; -fx-border-width: 5;">
+         <children>
+            <ImageView fx:id="canteenImageView" fitHeight="1024.0" fitWidth="1440.0" layoutX="8.0" layoutY="7.0" pickOnBounds="true" preserveRatio="true" style="-fx-fit-width: 1440; -fx-fit-height: 1024;">
+               <image>
+                  <Image url="@canteen.png" />
+               </image>
+            </ImageView>
+            <Pane fx:id="tableTopLeftCornerPane" layoutX="118.0" layoutY="489.0" prefHeight="240.0" prefWidth="184.0">
+               <children>
+                  <Pane fx:id="table1row1" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table1row1chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table1row1chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table1row2" layoutY="61.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table1row2chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table1row2chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table1row3" layoutY="115.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table1row3chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table1row3chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="151.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table1row4" layoutY="180.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table1row4chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table1row4chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="149.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+               </children>
+            </Pane>
+            <Pane fx:id="tableCenterTopLeftCornerPane" layoutX="329.0" layoutY="489.0" prefHeight="240.0" prefWidth="184.0">
+               <children>
+                  <Pane fx:id="table2row1" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table2row1chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table2row1chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table2row2" layoutY="61.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table2row2chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table2row2chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table2row3" layoutY="115.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table2row3chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table2row3chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="151.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table2row4" layoutY="180.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table2row4chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table2row4chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="149.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+               </children>
+            </Pane>
+            <Pane fx:id="tableBottomLeftCornerPane" layoutX="118.0" layoutY="770.0" prefHeight="240.0" prefWidth="184.0">
+               <children>
+                  <Pane fx:id="table5row1" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table5row1chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table5row1chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table5row2" layoutY="61.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table5row2chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table5row2chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table5row3" layoutY="115.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table5row3chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table5row3chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="151.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table5row4" layoutY="180.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table5row4chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table5row4chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="149.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+               </children>
+            </Pane>
+            <Pane fx:id="tableCenterBottomLeftCornerPane" layoutX="329.0" layoutY="770.0" prefHeight="240.0" prefWidth="184.0">
+               <children>
+                  <Pane fx:id="table6row1" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table6row1chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table6row1chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table6row2" layoutY="61.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table6row2chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table6row2chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table6row3" layoutY="115.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table6row3chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table6row3chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="151.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table6row4" layoutY="180.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table6row4chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table6row4chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="149.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+               </children>
+            </Pane>
+            <Pane fx:id="tableCenterBottomRightCornerPane" layoutX="542.0" layoutY="770.0" prefHeight="240.0" prefWidth="184.0">
+               <children>
+                  <Pane fx:id="table7row1" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table7row1chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table7row1chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table7row2" layoutY="61.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table7row2chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table7row2chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table7row3" layoutY="115.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table7row3chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table7row3chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="151.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table7row4" layoutY="180.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table7row4chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table7row4chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="149.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+               </children>
+            </Pane>
+            <Pane fx:id="tableCenterTopRightCornerPane" layoutX="542.0" layoutY="489.0" prefHeight="240.0" prefWidth="184.0">
+               <children>
+                  <Pane fx:id="table3row1" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table3row1chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table3row1chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table3row2" layoutY="61.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table3row2chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table3row2chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table3row3" layoutY="115.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table3row3chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table3row3chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="151.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table3row4" layoutY="180.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table3row4chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table3row4chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="149.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+               </children>
+            </Pane>
+            <Pane fx:id="tableTopRightCornerPane" layoutX="804.0" layoutY="489.0" prefHeight="240.0" prefWidth="184.0">
+               <children>
+                  <Pane fx:id="table4row1" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table4row1chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table4row1chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table4row2" layoutY="61.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table4row2chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table4row2chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table4row3" layoutY="115.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table4row3chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table4row3chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="151.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table4row4" layoutY="180.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table4row4chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table4row4chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="149.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+               </children>
+            </Pane>
+            <Pane fx:id="tableBottomRightCornerPane" layoutX="804.0" layoutY="770.0" prefHeight="240.0" prefWidth="184.0">
+               <children>
+                  <Pane fx:id="table8row1" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table8row1chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table8row1chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table8row2" layoutY="61.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table8row2chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table8row2chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="152.0" layoutY="4.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table8row3" layoutY="115.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table8row3chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table8row3chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="151.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+                  <Pane fx:id="table8row4" layoutY="180.0" prefHeight="60.0" prefWidth="184.0">
+                     <children>
+                        <ImageView fx:id="table8row4chairLeft" fitHeight="38.0" fitWidth="37.0" layoutX="-4.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="-90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="table8row4chairRight" fitHeight="38.0" fitWidth="37.0" layoutX="149.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true" rotate="90.0">
+                           <image>
+                              <Image url="@chair.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </Pane>
+               </children>
+            </Pane>
+         </children></AnchorPane>
    </children>
 </AnchorPane>

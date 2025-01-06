@@ -267,44 +267,38 @@ public class SKSceneManager {
     private final CanteenManager simulationManager = new CanteenManager();
 
     //TODO: Naprawić
-    private final List<Pane> tables = new ArrayList<>(List.of(
-        tableTopLeftCornerPane,
-        tableCenterTopLeftCornerPane,
-        tableCenterTopRightCornerPane,
-        tableTopRightCornerPane,
-        tableBottomLeftCornerPane,
-        tableCenterBottomLeftCornerPane,
-        tableCenterBottomRightCornerPane,
-        tableBottomRightCornerPane
-    ));
-    private final List<Pane> pairsOfChairs = new ArrayList<>(List.of(
-            table1row1, table1row2, table1row3, table1row4,
-            table2row1, table2row2, table2row3, table2row4,
-            table3row1, table3row2, table3row3, table3row4,
-            table4row1, table4row2, table4row3, table4row4,
-            table5row1, table5row2, table5row3, table5row4,
-            table6row1, table6row2, table6row3, table6row4,
-            table7row1, table7row2, table7row3, table7row4,
-            table8row1, table8row2, table8row3, table8row4
-    ));
+    private List<Pane> tables = new ArrayList<>();
+
 
     public void initialize() {
+        tables.addAll(canteenAnchorPane.getChildren().stream()
+                .filter(node -> node instanceof Pane)
+                .map(node -> (Pane) node)
+                .toList());
+
         simulationSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 simulationManager.setSimulationSpeed(newValue.intValue());
+            }
+        });
+
+        simulationNChairsSlider.valueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 simulationManager.setNSeats(newValue.intValue());
-                tables.forEach(table -> table.getChildren()
-                        .stream().forEach(pairOfChairs -> {
-                            if(pairOfChairs instanceof ImageView row) {
+
+                tables.forEach(table -> table.getChildren().forEach(pairOfChairs -> {
+                            if(pairOfChairs instanceof Pane row) {
                                 row.setVisible(false);
                             }
                         })
                 );
+
                 tables.forEach(table -> table.getChildren()
                         .stream().limit(newValue.intValue())
                         .forEach(pairOfChairs -> {
-                            if(pairOfChairs instanceof ImageView row) {
+                            if(pairOfChairs instanceof Pane row) {
                                 row.setVisible(true);
                             }
                         })

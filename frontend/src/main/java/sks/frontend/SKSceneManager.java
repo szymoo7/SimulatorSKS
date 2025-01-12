@@ -1,13 +1,9 @@
 package sks.frontend;
 
-import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.image.Image;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
@@ -15,7 +11,6 @@ import sks.backend.CanteenManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SKSceneManager {
     /* AnchorPanes */
@@ -23,6 +18,14 @@ public class SKSceneManager {
     private AnchorPane mainAnchorPane;
     @FXML
     private AnchorPane canteenAnchorPane;
+
+    /* Buttons */
+    @FXML
+    private ToggleButton startButton;
+    @FXML
+    private ToggleButton stopButton;
+    @FXML
+    private ToggleGroup toggleGroup;
 
     /* ImageViews - Scene */
     @FXML
@@ -305,5 +308,34 @@ public class SKSceneManager {
                 );
             }
         });
+
+        startButton.setToggleGroup(toggleGroup);
+        stopButton.setToggleGroup(toggleGroup);
+        startButton.setSelected(false);
+        stopButton.setSelected(true);
+
+    }
+
+    @FXML
+    protected void onStartButtonClick() {
+        simulationManager.startSimulation();
+        new Thread(() -> {
+            while (true) {
+                if (!startButton.isSelected()) {
+                    break;
+                }
+                simulationManager.generateClient();
+                try {
+                    Thread.sleep(1000); // Adjust the sleep time as needed
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }).start();
+    }
+
+    @FXML
+    protected void onStopButtonClick() {
+        simulationManager.stopSimulation();
     }
 }

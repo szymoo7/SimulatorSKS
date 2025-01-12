@@ -20,16 +20,12 @@ public class Cook extends Thread {
     @Override
     public void run() {
         while(true) {
-            try {
-                Client current = peekClient();
-                if(current != null) {
-                    serveClient(current);
-                    removeClient();
-                    current.setStatus(ClientStatus.IN_QUEUE_TO_PAY);
-                    System.out.println("\u001B[32mClient id: " + current.id() + " has been served from " + name + "\u001B[0m");
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            Client current = peekClient();
+            if(current != null) {
+                serveClient(current);
+                removeClient();
+                current.setStatus(ClientStatus.IN_QUEUE_TO_PAY);
+                System.out.println("\u001B[32mClient id: " + current.id() + " has been served from " + name + "\u001B[0m");
             }
         }
     }
@@ -47,9 +43,13 @@ public class Cook extends Thread {
         line.removeClient();
     }
 
-    private void serveClient(Client current) throws InterruptedException {
+    private void serveClient(Client current) {
         System.out.println("\u001B[32mClient id: " + current.id() + " is being served from " + name + "\u001B[0m");
-        Thread.sleep(random.nextInt(3000, 8000));
+        try {
+            Thread.sleep(random.nextInt(3000, 8000));
+        } catch (InterruptedException e) {
+            System.out.println("Cook was interrupted");
+        }
     }
 
 }

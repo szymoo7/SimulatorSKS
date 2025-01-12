@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -10,7 +11,7 @@
 
 <AnchorPane fx:id="mainAnchorPane" prefHeight="1080.0" prefWidth="1920.0" style="-fx-background-color: #B63838;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sks.frontend.SKSceneManager">
    <children>
-      <Label layoutX="1513.0" layoutY="214.0" text="Liczba rzędów krzeseł przy stole">
+      <Label layoutX="1514.0" layoutY="225.0" text="Liczba rzędów krzeseł przy stole">
          <font>
             <Font name="Courier New" size="20.0" />
          </font>
@@ -20,8 +21,8 @@
             <Font name="Courier New" size="20.0" />
          </font>
       </Label>
-      <Slider fx:id="simulationSpeedSlider" layoutX="1552.0" layoutY="187.0" prefHeight="14.0" prefWidth="306.0" />
-      <Slider fx:id="simulationNChairsSlider" blockIncrement="1.0" layoutX="1553.0" layoutY="248.0" majorTickUnit="1.0" max="4.0" min="1.0" minorTickCount="0" prefHeight="14.0" prefWidth="306.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="4.0" />
+      <Slider fx:id="simulationSpeedSlider" blockIncrement="1.0" layoutX="1552.0" layoutY="187.0" majorTickUnit="1.0" max="5.0" min="1.0" minorTickCount="0" prefHeight="14.0" prefWidth="306.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
+      <Slider fx:id="simulationNChairsSlider" blockIncrement="1.0" layoutX="1554.0" layoutY="249.0" majorTickUnit="1.0" max="4.0" min="1.0" minorTickCount="0" prefHeight="14.0" prefWidth="306.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="4.0" />
       <Label fx:id="simulationSettingsLabel" layoutX="1617.0" layoutY="83.0" prefHeight="46.0" prefWidth="175.0" text="Ustawienia" textAlignment="CENTER">
          <font>
             <Font name="Consolas Bold" size="31.0" />
@@ -515,5 +516,11 @@
                </children>
             </Pane>
          </children></AnchorPane>
+      <ToggleButton fx:id="startButton" layoutX="1617.0" layoutY="313.0" mnemonicParsing="false" onAction="#onStartButtonClick" text="Start">
+         <font>
+            <Font name="Consolas" size="12.0" />
+         </font>
+      </ToggleButton>
+      <ToggleButton fx:id="stopButton" layoutX="1708.0" layoutY="323.0" mnemonicParsing="false" onAction="#onStopButtonClick" text="Stop" />
    </children>
 </AnchorPane>

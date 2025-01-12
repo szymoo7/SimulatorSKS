@@ -1,11 +1,7 @@
 package sks.backend;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class CanteenManager {
 
@@ -23,41 +19,62 @@ public class CanteenManager {
             add(new Counter(false, new Line("Kolejka do kasy 2")));
         }
     };
+    static volatile List<Thread> threads = new ArrayList<>();
 
+    private volatile boolean isRunning = false;
     private double simulationSpeed = 1;
     private int nSeats = 1;
+    private long clientEveryNSeconds = 1;
 
 
-    public CanteenManager(int clientsPerSec, int nSeats) {
-        for(int i = 0; i < 8; i++) {
-            tables.add(new Table(nSeats, i));
-        }
+    public CanteenManager(int clientEveryNSeconds, int nSeats) {
+        this.clientEveryNSeconds = clientEveryNSeconds;
+        this.nSeats = nSeats;
+
     }
 
     public CanteenManager() {
     }
 
-    public void startSimulation() throws InterruptedException {
 
+    public void startSimulation() {
+        clients.clear();
+        tables.clear();
+        threads.clear();
+        for(int i = 0; i < 8; i++) {
+            tables.add(new Table(nSeats, i));
+        }
         for (int i = 0; i < 2; i++) {
-            new Cook(lines.get(i), 1).start();
-        }
-
-        counters.get(0).start();
-
-        for(int i = 0; i < 250; i++) {
-            Client c = new Client(this);
-            clients.add(c);
+            Cook c = new Cook(lines.get(i), 1);
+            threads.add(c);
             c.start();
-            Thread.sleep(2500);
         }
 
+        for(Counter c: counters) {
+            c.start();
+        }
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        CanteenManager canteenManager = new CanteenManager(1, 1);
-        canteenManager.startSimulation();
+    public void generateClient() {
+        Client client = new Client(this);
+        clients.add(client);
+        client.start();
     }
+
+    public void stopSimulation() {
+        for(Thread t: threads) {
+            t.interrupt();
+        }
+        for(Counter c: counters) {
+            c.interrupt();
+        }
+    }
+
+
+//    public static void main(String[] args) throws InterruptedException {
+//        CanteenManager canteenManager = new CanteenManager(1, 1);
+//        canteenManager.startSimulation();
+//    }
 
 
     public List<Line> getLines() {
@@ -79,4 +96,14 @@ public class CanteenManager {
     public void setNSeats(int i) {
         this.nSeats = i;
     }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public void setStatus(boolean status) {
+        this.isRunning = status;
+    }
+
+
 }

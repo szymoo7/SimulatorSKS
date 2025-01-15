@@ -16,6 +16,8 @@ public class Client extends Thread {
     private String order;
     private ClientStatus status;
     private CanteenManager resources;
+    private volatile double x;
+    private volatile double y;
 
     public Client(CanteenManager resources) {
         this.id = idCreator.getAndIncrement();

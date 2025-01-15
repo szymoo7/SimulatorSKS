@@ -13,16 +13,18 @@ public class Cashier extends Thread {
     }
 
     public void run() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             if (toPayLine.getSize() > 0) {
                 Client current = peekClient();
-                if(current != null) {
+                if (current != null) {
                     try {
                         checkOut(current);
                         toPayLine.removeClient();
                         current.setStatus(ClientStatus.LOOKING_FOR_SEAT);
                     } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                        Thread.currentThread().interrupt();
+                        System.out.println("Cashier was interrupted");
+                        break;
                     }
                 }
             }

@@ -40,7 +40,9 @@ public class Cook extends Thread {
     }
 
     private void removeClient() {
-        line.removeClient();
+        if(line.getSize() > 0) {
+            line.removeClient();
+        }
     }
 
     private void serveClient(Client current) {

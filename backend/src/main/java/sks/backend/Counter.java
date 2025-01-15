@@ -12,7 +12,7 @@ public class Counter extends Thread {
     }
 
     public void run() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             if (isOpen) {
                 if (!cashier.isAlive()) {
                     cashier = new Cashier(toPayLine);
@@ -29,6 +29,9 @@ public class Counter extends Thread {
                 Thread.currentThread().interrupt();
                 break;
             }
+        }
+        if (cashier.isAlive()) {
+            cashier.interrupt();
         }
     }
 

@@ -1,11 +1,12 @@
 package sks.backend;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class CanteenManager {
 
-    static volatile List<Client> clients = new ArrayList<>();
+    static volatile List<Client> clients = Collections.synchronizedList(new ArrayList<>());
     static volatile List<Table> tables = new ArrayList<>();
     static volatile List<Line> lines = new ArrayList<>() {
         {
@@ -13,18 +14,13 @@ public class CanteenManager {
             add(new Line("Kolejka 2"));
         }
     };
-    static volatile List<Counter> counters = new ArrayList<>() {
-        {
-            add(new Counter(true, new Line("Kolejka do kasy 1")));
-            add(new Counter(false, new Line("Kolejka do kasy 2")));
-        }
-    };
+    static volatile List<Counter> counters = new ArrayList<>();
     static volatile List<Thread> threads = new ArrayList<>();
 
-    private volatile boolean isRunning = false;
-    private double simulationSpeed = 1;
-    private int nSeats = 1;
-    private long clientEveryNSeconds = 1;
+    private static volatile boolean isRunning = false;
+    private static double simulationSpeed = 1;
+    private static int nSeats = 1;
+    private static long clientEveryNSeconds = 1;
 
 
     public CanteenManager(int clientEveryNSeconds, int nSeats) {
@@ -41,6 +37,7 @@ public class CanteenManager {
         clients.clear();
         tables.clear();
         threads.clear();
+        counters.clear();
         for(int i = 0; i < 8; i++) {
             tables.add(new Table(nSeats, i));
         }
@@ -50,15 +47,18 @@ public class CanteenManager {
             c.start();
         }
 
-        for(Counter c: counters) {
+        counters.add(new Counter(true, new Line("Kolejka do kasy 1")));
+        counters.add(new Counter(false, new Line("Kolejka do kasy 2")));
+        for(Counter c : counters) {
             c.start();
         }
     }
 
-    public void generateClient() {
+    public Client generateClient() {
         Client client = new Client(this);
         clients.add(client);
         client.start();
+        return client;
     }
 
     public void stopSimulation() {
@@ -103,6 +103,14 @@ public class CanteenManager {
 
     public void setStatus(boolean status) {
         this.isRunning = status;
+    }
+
+    public long getClientEveryNSeconds() {
+        return clientEveryNSeconds;
+    }
+
+    public List<Client> getClients() {
+        return clients;
     }
 
 

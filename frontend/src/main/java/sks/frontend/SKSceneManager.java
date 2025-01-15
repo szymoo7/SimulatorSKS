@@ -1,16 +1,19 @@
 package sks.frontend;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import sks.backend.CanteenManager;
+import sks.backend.Client;
+import sks.backend.Line;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class SKSceneManager {
     /* AnchorPanes */
@@ -30,6 +33,15 @@ public class SKSceneManager {
     /* ImageViews - Scene */
     @FXML
     private ImageView canteenImageView;
+
+    private List<Image> characterSkins = new ArrayList<>() {
+        {
+            add(new Image("C:\\Users\\szyme\\IdeaProjects\\SimulatorSKS\\frontend\\src\\main\\resources\\sks\\frontend\\assets\\babka_w_sukience.png"));
+//            add(new Image("chlop_z_papierem_i_z_teczka.png").getUrl());
+//            add(new Image("tinky_winky.png").getUrl());
+//            add(new Image("new_character.png").getUrl());
+        }
+    };
 
     /* Simulation settings panel */
     @FXML
@@ -268,9 +280,24 @@ public class SKSceneManager {
     private ImageView table8row4chairRight;
 
     private final CanteenManager simulationManager = new CanteenManager();
+    private final Random random = new Random();
 
-    //TODO: Naprawić
     private List<Pane> tables = new ArrayList<>();
+    private Map<Client, ImageView> skins = new HashMap<>();
+
+    private Runnable generateClietsLambda = () -> {
+        while(true) {
+            simulationManager.generateClient();
+            try {
+                Thread.sleep(simulationManager.getClientEveryNSeconds() * 1000);
+            } catch (InterruptedException e) {
+                System.out.println("Interrupting generating clients");
+                break;
+            }
+        }
+    };
+
+    private Thread currentGenerator;
 
 
     public void initialize() {
@@ -319,23 +346,13 @@ public class SKSceneManager {
     @FXML
     protected void onStartButtonClick() {
         simulationManager.startSimulation();
-        new Thread(() -> {
-            while (true) {
-                if (!startButton.isSelected()) {
-                    break;
-                }
-                simulationManager.generateClient();
-                try {
-                    Thread.sleep(1000); // Adjust the sleep time as needed
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }).start();
+        currentGenerator = new Thread(generateClietsLambda);
+        currentGenerator.start();
     }
 
     @FXML
     protected void onStopButtonClick() {
+        currentGenerator.interrupt();
         simulationManager.stopSimulation();
     }
 }

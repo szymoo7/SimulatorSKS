@@ -1,8 +1,11 @@
 package sks.backend;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.awt.*;
+import java.awt.geom.Point2D;
+import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class CanteenManager {
 
@@ -16,6 +19,7 @@ public class CanteenManager {
     };
     static volatile List<Counter> counters = new ArrayList<>();
     static volatile List<Thread> threads = new ArrayList<>();
+    static volatile Queue<ClientDto> toUpdate = new ConcurrentLinkedQueue<>();
 
     private static volatile boolean isRunning = false;
     private static double simulationSpeed = 1;
@@ -113,5 +117,11 @@ public class CanteenManager {
         return clients;
     }
 
+    public synchronized void setClientToUpdate(ClientDto client) {
+        toUpdate.add(client);
+    }
 
+    public synchronized ClientDto getClientToUpdate() {
+        return toUpdate.poll();
+    }
 }

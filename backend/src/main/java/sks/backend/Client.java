@@ -3,9 +3,10 @@ package sks.backend;
 import sks.backend.enums.ClientStatus;
 import sks.backend.enums.Dishes;
 
-import java.util.Comparator;
+import java.awt.*;
+import java.awt.geom.Point2D;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Client extends Thread {
@@ -16,8 +17,11 @@ public class Client extends Thread {
     private String order;
     private ClientStatus status;
     private CanteenManager resources;
-    private volatile double x;
-    private volatile double y;
+
+    private List<Point> coordinatesForAnimation =  List.of(
+            new Point(1448,559),
+            new Point(1386, 550)
+    );
 
     public Client(CanteenManager resources) {
         this.id = idCreator.getAndIncrement();
@@ -27,13 +31,14 @@ public class Client extends Thread {
 
     @Override
     public void run() {
+        resources.setClientToUpdate(new ClientDto(this.id,
+                coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
+        simulateAction(3000);
+        resources.setClientToUpdate(new ClientDto(this.id,
+                coordinatesForAnimation.get(1).x, coordinatesForAnimation.get(1).y));
         joinQueue();
         while (status != ClientStatus.IN_QUEUE_TO_PAY) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            simulateAction(100);
         }
         goToCounter();
         while (status != ClientStatus.LOOKING_FOR_SEAT) {
@@ -127,4 +132,13 @@ public class Client extends Thread {
         this.status = ClientStatus.EXITING;
         System.out.println("\u001B[32mClient id: " + id + " is leaving" + "\u001B[0m");
     }
+
+    private void simulateAction(long milis) {
+        try {
+            Thread.sleep(milis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

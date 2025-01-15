@@ -11,6 +11,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import sks.backend.CanteenManager;
 import sks.backend.Client;
+import sks.backend.ClientDto;
 import sks.backend.Line;
 
 import java.util.*;
@@ -283,7 +284,7 @@ public class SKSceneManager {
     private final Random random = new Random();
 
     private List<Pane> tables = new ArrayList<>();
-    private Map<Client, ImageView> skins = new HashMap<>();
+    private Map<Integer, ImageView> clientsOnScene = new HashMap<>();
 
     private Runnable generateClietsLambda = () -> {
         while(true) {
@@ -348,6 +349,25 @@ public class SKSceneManager {
         simulationManager.startSimulation();
         currentGenerator = new Thread(generateClietsLambda);
         currentGenerator.start();
+
+        //TODO: Zrobić kanał np. arrayliste gdzie przekazuje klientów i wspolrzedne do zaktualizowania
+        Platform.runLater( () -> {
+            while (true) {
+                ClientDto current = simulationManager.getClientToUpdate();
+                if (current != null) {
+                    System.out.println("Current client: " + current);
+                    clientsOnScene.compute(current.getId(), (id, image) -> {
+                        if (image == null) {
+                            image = new ImageView(characterSkins.get(0));
+                        }
+                        image.setX(current.getX());
+                        image.setY(current.getY());
+                        return image;
+                    });
+                    System.out.println("Chuj kurwa nie ma obrazu");
+                }
+            }
+        });
     }
 
     @FXML

@@ -288,10 +288,13 @@ public class SKSceneManager {
 
     private List<Pane> tables = new ArrayList<>();
     private Map<Integer, ImageView> clientsOnScene = new HashMap<>();
+    private final PathTransition pathTransition = new PathTransition();
 
     private Runnable generateClietsLambda = () -> {
-        while(true) {
+        int numberOfClients = 0;
+        while(numberOfClients < 10) {
             simulationManager.generateClient();
+            numberOfClients++;
             try {
                 Thread.sleep(simulationManager.getClientEveryNSeconds() * 1000);
             } catch (InterruptedException e) {
@@ -363,7 +366,7 @@ public class SKSceneManager {
             ClientDto current = simulationManager.getClientToUpdate();
             TableSeatDto tableSeatDto = simulationManager.getTableSeatToUpdate();
             if (current != null) {
-                System.out.println("Current client: " + current);
+                //System.out.println("Current client: " + current);
                 Platform.runLater(() -> {
                     clientsOnScene.compute(current.getId(), (id, image) -> {
                         if (image == null) {
@@ -398,7 +401,7 @@ public class SKSceneManager {
                 });
             }
             if(tableSeatDto != null) {
-                System.out.println("Current table seat: " + tableSeatDto);
+                System.out.println("Current table seat: " + tableSeatDto + " id = " + tableSeatDto.getId());
                 int toGoX = 0;
                 int toGoY = 0;
                 ImageView seat = canteenAnchorPane.getChildren().stream()
@@ -411,7 +414,6 @@ public class SKSceneManager {
                                                 .filter(imageView -> imageView.getId().equals(tableSeatDto.getTableSeatId()))
                         .findFirst().orElseThrow();
 
-                System.out.println("Seat: " + seat.getId());
                 Pane rowPane = (Pane) seat.getParent();
                 Pane tablePane = (Pane) rowPane.getParent();
                 toGoX += seat.getLayoutX();
@@ -423,17 +425,19 @@ public class SKSceneManager {
                 toGoX += canteenAnchorPane.getLayoutX();
                 toGoY += canteenAnchorPane.getLayoutY();
 
-                System.out.println("Seat: " + seat.getId() + "coords" + toGoX + " " + toGoY);
+                System.out.println("Seat: " + seat.getId() + "coords x = " + toGoX + " y = " + toGoY);
 
                 int finalToGoX = toGoX;
                 int finalToGoY = toGoY;
                 Platform.runLater(() -> {
                     clientsOnScene.compute(tableSeatDto.getId(), (id, image) -> {
-                        PathTransition pathTransition = new PathTransition();
                         pathTransition.setDuration(Duration.millis(1000));
                         pathTransition.setNode(image);
                         pathTransition.setPath(new Polyline(image.getX(), image.getY(), finalToGoX, finalToGoY));
                         pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+                        pathTransition.setOnFinished(event -> {
+                            System.out.println("Finished animation for client id: " + tableSeatDto.getId() + " table = " + tableSeatDto.getTable() + " seat = " + tableSeatDto.getSeat());
+                        });
                         pathTransition.play();
                         image.setX(finalToGoX);
                         image.setY(finalToGoY);
@@ -442,7 +446,8 @@ public class SKSceneManager {
                     });
                 });
             }
-        }, 0, 250, TimeUnit.MILLISECONDS);
+            System.out.println("Current clients on scene: " + clientsOnScene.size());
+        }, 0, 500, TimeUnit.MILLISECONDS);
     }
 
     @FXML

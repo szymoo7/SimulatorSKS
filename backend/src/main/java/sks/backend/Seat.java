@@ -3,9 +3,8 @@ package sks.backend;
 import java.awt.*;
 
 public class Seat {
-    private int seatNumber;
-    private boolean isOccupied;
-    private Point coords;
+    private volatile int seatNumber;
+    private volatile boolean isOccupied;
 
     public Seat(int seatNumber) {
         this.seatNumber = seatNumber;
@@ -24,7 +23,18 @@ public class Seat {
         return isOccupied;
     }
 
-    public void setOccupied(boolean occupied) {
-        isOccupied = occupied;
+    public synchronized boolean setOccupied(boolean occupied) {
+        if(isOccupied && occupied == true) {
+            return false;
+        }
+        if(isOccupied && occupied == false) {
+            isOccupied = occupied;
+            return true;
+        }
+        if(!isOccupied && occupied) {
+            isOccupied = occupied;
+            return true;
+        }
+        return false;
     }
 }

@@ -14,9 +14,10 @@ public class Client extends Thread {
     private static final Random random = new Random();
     private static final AtomicInteger idCreator = new AtomicInteger(0);
     private final int id;
-    private String order;
-    private ClientStatus status;
+    private volatile String order;
+    private volatile ClientStatus status;
     private CanteenManager resources;
+    private volatile Seat currentSeat;
 
     private List<Point> coordinatesForAnimation =  List.of(
             new Point(1365,559),
@@ -24,8 +25,8 @@ public class Client extends Thread {
             new Point(1050, 100),
             new Point(648,227),
             new Point(236, 90),
-            new Point(825, 200),//l
-            new Point(509, 222),// p
+            new Point(825, 200),
+            new Point(509, 222),
             new Point(800, 20)
     );
 
@@ -43,13 +44,8 @@ public class Client extends Thread {
                 coordinatesForAnimation.get(1).x, coordinatesForAnimation.get(1).y));
         simulateAction(1000);
         joinQueue();
-        while (status != ClientStatus.IN_QUEUE_TO_PAY) {
-            simulateAction(1);
-        }
         goToCounter();
-        while (status != ClientStatus.LOOKING_FOR_SEAT) {
-            simulateAction(1);
-        }
+        //Tu jest błąd, bo nie zawsze pierwsza osoba w kolejce idzie pierwsza do stolika
         try {
             goEating();
         } catch (InterruptedException e) {
@@ -96,16 +92,24 @@ public class Client extends Thread {
     }
 
     private void goToCounter() {
-        Line shortestLine = findShorterLine(resources.getToPayLines());
-        shortestLine.addClient(this);
-        if(shortestLine.getId() == 3) {
-            resources.setClientToUpdate(new ClientDto(this.id,
-                    coordinatesForAnimation.get(5).x, coordinatesForAnimation.get(5).y));
+        //TUTAJ!!!!
+        while(status != ClientStatus.ORDERED) {
+            simulateAction(1);
         }
-        else if(shortestLine.getId() == 4) {
-            resources.setClientToUpdate(new ClientDto(this.id,
-                    coordinatesForAnimation.get(6).x, coordinatesForAnimation.get(6).y));
+        synchronized (resources) {
+            resources.notifyAll();
+            Line shortestLine = findShorterLine(resources.getToPayLines());
+            shortestLine.addClient(this);
+            if(shortestLine.getId() == 3) {
+                resources.setClientToUpdate(new ClientDto(this.id,
+                        coordinatesForAnimation.get(5).x, coordinatesForAnimation.get(5).y));
+            }
+            else if(shortestLine.getId() == 4) {
+                resources.setClientToUpdate(new ClientDto(this.id,
+                        coordinatesForAnimation.get(6).x, coordinatesForAnimation.get(6).y));
+            }
         }
+        this.status = ClientStatus.IN_QUEUE_TO_PAY;
         simulateAction(1000);
     }
 
@@ -127,42 +131,49 @@ public class Client extends Thread {
         this.order = Dishes.values()[random.nextInt(Dishes.values().length)].name();
     }
 
-    private Seat findSeat(Table table) {
-        Seat seat = table.getSeats()
-                .stream()
-                .filter(s -> !s.isOccupied())
-                .findFirst().orElseThrow();
-        seat.setOccupied(true);
-        return seat;
+    //TODO: Reentrance lock?
+    private synchronized void findAndTakeSeat() {
+        while (currentSeat == null) {
+            Table table = resources.getTables().stream()
+                    .filter(t -> t.getSeats().stream().anyMatch(s -> !s.isOccupied()))
+                    .findFirst()
+                    .orElseThrow();
+            Seat seat = table.getSeats().stream()
+                    .filter(s -> !s.isOccupied())
+                    .findFirst()
+                    .orElseThrow();
+            if(seat.setOccupied(true)) {
+                currentSeat = seat;
+                resources.setTableSeatToUpdate(new TableSeatDto(this.id,
+                        table.getNumber(), seat.getSeatNumber()));
+            }
+        }
+        simulateAction(1000);
     }
 
-    private Table findTable() {
-        return resources.getTables()
-                .stream()
-                .filter(table -> table.getSeats().stream().anyMatch(seat -> !seat.isOccupied()))
-                .findFirst().orElseThrow();
+    private synchronized void leaveSeat() {
+        while(currentSeat != null) {
+            if(currentSeat.setOccupied(false)) {
+                System.out.println("Chuj kurwa jestem");
+                resources.setClientToUpdate(new ClientDto(this.id,
+                        coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
+                simulateAction(1000);
+                resources.setClientToUpdate(new ClientDto(this.id,
+                        null, null));
+                currentSeat = null;
+            }
+        }
     }
 
     private void goEating() throws InterruptedException {
-        Seat currentSeat;
-        synchronized (resources) {
-            Table table = findTable();
-            currentSeat = findSeat(table);
-            resources.setTableSeatToUpdate(new TableSeatDto(this.id,
-                    table.getNumber(), currentSeat.getSeatNumber()));
-            System.out.println("\u001B[32mClient id: " + id + " is eating at table (" + table.getNumber() + ")\u001B[0m");
+        while (status != ClientStatus.LOOKING_FOR_SEAT) {
+            simulateAction(1);
         }
-
-        simulateAction(1000);
+        findAndTakeSeat();
         this.status = ClientStatus.EATING;
-        simulateAction(10_000);
+        simulateAction(10000);
         this.status = ClientStatus.EXITING;
-        resources.setClientToUpdate(new ClientDto(this.id,
-                coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
-        simulateAction(1000);
-        resources.setClientToUpdate(new ClientDto(this.id,
-                null, null));
-        currentSeat.setOccupied(false);
+        leaveSeat();
         System.out.println("\u001B[32mClient id: " + id + " is leaving" + "\u001B[0m");
     }
 

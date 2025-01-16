@@ -31,8 +31,8 @@ public class Line {
         return name;
     }
 
-    public void removeClient() {
-        clientsInLine.remove();
+    public Client removeClient() {
+        return clientsInLine.remove();
     }
 
     public int getId() {

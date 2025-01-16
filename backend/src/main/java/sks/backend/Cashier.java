@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Cashier extends Thread {
-    private final Line toPayLine;
+    private volatile Line toPayLine;
     private static final Random random = new Random();
     private CanteenManager resources;
 
@@ -30,7 +30,7 @@ public class Cashier extends Thread {
                         checkOut(current);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        System.out.println("Cashier was interrupted");
+                        //System.out.println("Cashier was interrupted");
                         break;
                     }
                 }
@@ -39,8 +39,11 @@ public class Cashier extends Thread {
     }
 
     private Client peekClient() {
-        Client current = toPayLine.peekClient();
+        Client current = toPayLine.removeClient();
         if(current == null) {
+            return null;
+        }
+        if(current.getStatus() != ClientStatus.IN_QUEUE_TO_PAY) {
             return null;
         }
         if(toPayLine.getId() == 3) {
@@ -55,11 +58,10 @@ public class Cashier extends Thread {
     }
 
     private void checkOut(Client current) throws InterruptedException {
-        System.out.println("\u001B[32mClient " + current.id() + " is paying at " + toPayLine.getName() + "\u001B[0m");
-        Thread.sleep(random.nextInt(5_000, 15_000));
-        System.out.println("\u001B[34mClient " + current.id() + " has paid at " + toPayLine.getName() + "\u001B[0m");
+        //System.out.println("\u001B[32mClient " + current.id() + " is paying at " + toPayLine.getName() + "\u001B[0m");
+        Thread.sleep(5000);
+        //System.out.println("\u001B[34mClient " + current.id() + " has paid at " + toPayLine.getName() + "\u001B[0m");
         current.setStatus(ClientStatus.LOOKING_FOR_SEAT);
-        toPayLine.removeClient();
     }
 
 }

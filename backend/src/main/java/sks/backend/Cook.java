@@ -43,8 +43,8 @@ public class Cook extends Thread {
                 simulateAction(1100);
                 serveClient(current);
                 removeClient();
-                current.setStatus(ClientStatus.IN_QUEUE_TO_PAY);
-                System.out.println("\u001B[32mClient id: " + current.id() + " has been served from " + name + "\u001B[0m");
+                current.setStatus(ClientStatus.ORDERED);
+                //System.out.println("\u001B[32mClient id: " + current.id() + " has been served from " + name + "\u001B[0m");
             }
         }
     }
@@ -65,11 +65,11 @@ public class Cook extends Thread {
     }
 
     private void serveClient(Client current) {
-        System.out.println("\u001B[32mClient id: " + current.id() + " is being served from " + name + "\u001B[0m");
+        //System.out.println("\u001B[32mClient id: " + current.id() + " is being served from " + name + "\u001B[0m");
         try {
             Thread.sleep(random.nextInt(3000, 8000));
         } catch (InterruptedException e) {
-            System.out.println("Cook was interrupted");
+            //System.out.println("Cook was interrupted");
         }
     }
     private void simulateAction(long milis) {

@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 public class Table {
     //nSeats to liczba miejsc z jednej strony stołu czyli jeden stół to 2*nSeats miejsc a stołów jest 8
     private int number;
-    private final List<Seat> seats;
+    private volatile List<Seat> seats;
     private static final List<Point> coordsTable1 = List.of(
             new Point(-4, 12),
             new Point(152, 12),

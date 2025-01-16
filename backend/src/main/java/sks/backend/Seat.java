@@ -1,8 +1,11 @@
 package sks.backend;
 
+import java.awt.*;
+
 public class Seat {
     private int seatNumber;
     private boolean isOccupied;
+    private Point coords;
 
     public Seat(int seatNumber) {
         this.seatNumber = seatNumber;

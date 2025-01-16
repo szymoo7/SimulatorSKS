@@ -11,6 +11,9 @@ public class ClientDto {
         this.y = y;
     }
 
+    public ClientDto() {
+    }
+
     public Integer getId() {
         return id;
     }

@@ -2,6 +2,8 @@ package sks.backend;
 
 import sks.backend.enums.ClientStatus;
 
+import java.awt.*;
+import java.util.List;
 import java.util.Random;
 
 public class Cook extends Thread {
@@ -10,18 +12,35 @@ public class Cook extends Thread {
     private static final Random random = new Random();
     private final Line line;
     private final String name;
+    private CanteenManager resources;
 
-    public Cook(Line line, double speed) {
+    public Cook(CanteenManager resources, Line line, double speed) {
         this.line = line;
         this.speed = speed;
         this.name = line.getName();
+        this.resources = resources;
     }
+    private java.util.List<Point> coordinatesForAnimation =  List.of(
+            new Point(800, 20),
+            new Point(406,52)
+    );
 
     @Override
     public void run() {
         while(true) {
             Client current = peekClient();
             if(current != null) {
+                if(line.getId() == 1) {
+                    resources.setClientToUpdate(new ClientDto(current.id(),
+                            coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
+
+                }
+                else {
+                    resources.setClientToUpdate(new ClientDto(current.id(),
+                            coordinatesForAnimation.get(1).x, coordinatesForAnimation.get(1).y));
+
+                }
+                simulateAction(1100);
                 serveClient(current);
                 removeClient();
                 current.setStatus(ClientStatus.IN_QUEUE_TO_PAY);
@@ -32,7 +51,7 @@ public class Cook extends Thread {
 
     private Client peekClient() {
         Client current = line.peekClient();
-        if(current == null) {
+        if(current == null || current.getStatus() != ClientStatus.IN_QUEUE) {
             return null;
         }
         current.setStatus(ClientStatus.ORDERING);
@@ -51,6 +70,13 @@ public class Cook extends Thread {
             Thread.sleep(random.nextInt(3000, 8000));
         } catch (InterruptedException e) {
             System.out.println("Cook was interrupted");
+        }
+    }
+    private void simulateAction(long milis) {
+        try {
+            Thread.sleep(milis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

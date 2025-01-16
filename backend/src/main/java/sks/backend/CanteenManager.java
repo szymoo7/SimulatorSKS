@@ -13,13 +13,14 @@ public class CanteenManager {
     static volatile List<Table> tables = new ArrayList<>();
     static volatile List<Line> lines = new ArrayList<>() {
         {
-            add(new Line("Kolejka 1"));
-            add(new Line("Kolejka 2"));
+            add(new Line("Kolejka 1", 1));
+            add(new Line("Kolejka 2", 2));
         }
     };
     static volatile List<Counter> counters = new ArrayList<>();
     static volatile List<Thread> threads = new ArrayList<>();
     static volatile Queue<ClientDto> toUpdate = new ConcurrentLinkedQueue<>();
+    private volatile Queue<TableSeatDto> tableSeatToUpdate = new ConcurrentLinkedQueue<>();
 
     private static volatile boolean isRunning = false;
     private static double simulationSpeed = 1;
@@ -42,17 +43,17 @@ public class CanteenManager {
         tables.clear();
         threads.clear();
         counters.clear();
-        for(int i = 0; i < 8; i++) {
+        for(int i = 1; i < 9; i++) {
             tables.add(new Table(nSeats, i));
         }
         for (int i = 0; i < 2; i++) {
-            Cook c = new Cook(lines.get(i), 1);
+            Cook c = new Cook(this, lines.get(i), 1);
             threads.add(c);
             c.start();
         }
 
-        counters.add(new Counter(true, new Line("Kolejka do kasy 1")));
-        counters.add(new Counter(false, new Line("Kolejka do kasy 2")));
+        counters.add(new Counter(this, true, new Line("Kolejka do kasy 1", 3)));
+        counters.add(new Counter(this, true, new Line("Kolejka do kasy 2", 4)));
         for(Counter c : counters) {
             c.start();
         }
@@ -123,5 +124,13 @@ public class CanteenManager {
 
     public synchronized ClientDto getClientToUpdate() {
         return toUpdate.poll();
+    }
+
+    public synchronized TableSeatDto getTableSeatToUpdate() {
+        return tableSeatToUpdate.poll();
+    }
+
+    public synchronized void setTableSeatToUpdate(TableSeatDto tableSeat) {
+        tableSeatToUpdate.add(tableSeat);
     }
 }

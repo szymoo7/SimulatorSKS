@@ -4,18 +4,20 @@ public class Counter extends Thread {
     private boolean isOpen;
     private final Line toPayLine;
     private Cashier cashier;
+    private CanteenManager resources;
 
-    public Counter(boolean isOpen, Line toPayLine) {
+    public Counter(CanteenManager resources, boolean isOpen, Line toPayLine) {
         this.isOpen = isOpen;
         this.toPayLine = toPayLine;
-        this.cashier = new Cashier(toPayLine);
+        this.cashier = new Cashier(toPayLine, resources);
+        this.resources = resources;
     }
 
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             if (isOpen) {
                 if (!cashier.isAlive()) {
-                    cashier = new Cashier(toPayLine);
+                    cashier = new Cashier(toPayLine, resources);
                     cashier.start();
                 }
             } else {

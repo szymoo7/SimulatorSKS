@@ -4,12 +4,14 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Line {
+    private int id;
     private final String name;
     private final Queue<Client> clientsInLine;
 
-    public Line(String name) {
+    public Line(String name, int id) {
         this.clientsInLine = new ConcurrentLinkedQueue<>();
         this.name = name;
+        this.id = id;
     }
 
     public int getSize() {
@@ -31,5 +33,9 @@ public class Line {
 
     public void removeClient() {
         clientsInLine.remove();
+    }
+
+    public int getId() {
+        return id;
     }
 }

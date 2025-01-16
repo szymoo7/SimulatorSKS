@@ -1,5 +1,6 @@
 package sks.frontend;
 
+import javafx.animation.PathTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -9,12 +10,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import sks.backend.CanteenManager;
-import sks.backend.Client;
-import sks.backend.ClientDto;
-import sks.backend.Line;
+import javafx.scene.shape.Polyline;
+import javafx.util.Duration;
+import sks.backend.*;
 
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class SKSceneManager {
     /* AnchorPanes */
@@ -37,10 +40,10 @@ public class SKSceneManager {
 
     private List<Image> characterSkins = new ArrayList<>() {
         {
-            add(new Image("C:\\Users\\szyme\\IdeaProjects\\SimulatorSKS\\frontend\\src\\main\\resources\\sks\\frontend\\assets\\babka_w_sukience.png"));
-//            add(new Image("chlop_z_papierem_i_z_teczka.png").getUrl());
-//            add(new Image("tinky_winky.png").getUrl());
-//            add(new Image("new_character.png").getUrl());
+            add(new Image(getClass().getResourceAsStream("/sks/frontend/assets/babka_w_sukience.png")));
+            add(new Image(getClass().getResourceAsStream("/sks/frontend/assets/chlop.png")));
+            add(new Image(getClass().getResourceAsStream("/sks/frontend/assets/chlop_z_papierem_i_z_teczka.png")));
+            add(new Image(getClass().getResourceAsStream("/sks/frontend/assets/tinky_winky.png")));
         }
     };
 
@@ -299,6 +302,7 @@ public class SKSceneManager {
     };
 
     private Thread currentGenerator;
+    private Map<Table, Pane> tableToPane = new HashMap<>();
 
 
     public void initialize() {
@@ -319,12 +323,14 @@ public class SKSceneManager {
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 simulationManager.setNSeats(newValue.intValue());
 
-                tables.forEach(table -> table.getChildren().forEach(pairOfChairs -> {
-                            if(pairOfChairs instanceof Pane row) {
-                                row.setVisible(false);
-                            }
-                        })
-                );
+                List<Table> tableObjects = simulationManager.getTables();
+                List<Pane> tablePanes = canteenAnchorPane.getChildren().stream()
+                        .filter(node -> node instanceof Pane)
+                        .map(node -> (Pane) node)
+                        .toList();
+                for(int i = 0; i < tableObjects.size(); i++) {
+                    tableToPane.put(tableObjects.get(i), tablePanes.get(i));
+                }
 
                 tables.forEach(table -> table.getChildren()
                         .stream().limit(newValue.intValue())
@@ -350,24 +356,93 @@ public class SKSceneManager {
         currentGenerator = new Thread(generateClietsLambda);
         currentGenerator.start();
 
+
         //TODO: Zrobić kanał np. arrayliste gdzie przekazuje klientów i wspolrzedne do zaktualizowania
-        Platform.runLater( () -> {
-            while (true) {
-                ClientDto current = simulationManager.getClientToUpdate();
-                if (current != null) {
-                    System.out.println("Current client: " + current);
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.scheduleAtFixedRate(() -> {
+            ClientDto current = simulationManager.getClientToUpdate();
+            TableSeatDto tableSeatDto = simulationManager.getTableSeatToUpdate();
+            if (current != null) {
+                System.out.println("Current client: " + current);
+                Platform.runLater(() -> {
                     clientsOnScene.compute(current.getId(), (id, image) -> {
                         if (image == null) {
-                            image = new ImageView(characterSkins.get(0));
+                            image = new ImageView(characterSkins.get(random.nextInt(characterSkins.size())));
+                            canteenAnchorPane.getChildren().add(image);
+                            image.setX(current.getX());
+                            image.setFitHeight(75);
+                            image.setFitWidth(75);
+                            image.setY(current.getY());
+                            image.setVisible(true);
                         }
-                        image.setX(current.getX());
-                        image.setY(current.getY());
+                        else {
+                            PathTransition pathTransition = new PathTransition();
+                            pathTransition.setDuration(Duration.millis(1000));
+                            pathTransition.setNode(image);
+                            Integer toGoX = current.getX();
+                            Integer toGoY = current.getY();
+                            if(toGoX == null || toGoY == null) {
+                                image.setVisible(false);
+                                canteenAnchorPane.getChildren().remove(image);
+                                return null;
+                            }
+                            pathTransition.setPath(new Polyline(image.getX(), image.getY(), toGoX, toGoY));
+                            pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+                            pathTransition.play();
+                            image.setX(current.getX());
+                            image.setY(current.getY());
+                        }
+
                         return image;
                     });
-                    System.out.println("Chuj kurwa nie ma obrazu");
-                }
+                });
             }
-        });
+            if(tableSeatDto != null) {
+                System.out.println("Current table seat: " + tableSeatDto);
+                int toGoX = 0;
+                int toGoY = 0;
+                ImageView seat = canteenAnchorPane.getChildren().stream()
+                        .filter(node -> node instanceof Pane)
+                        .flatMap(node -> ((Pane) node).getChildren().stream())
+                        .filter(node -> node instanceof Pane)
+                        .flatMap(node -> ((Pane) node).getChildren().stream())
+                                .filter(node -> node instanceof ImageView)
+                                        .map(node -> (ImageView) node)
+                                                .filter(imageView -> imageView.getId().equals(tableSeatDto.getTableSeatId()))
+                        .findFirst().orElseThrow();
+
+                System.out.println("Seat: " + seat.getId());
+                Pane rowPane = (Pane) seat.getParent();
+                Pane tablePane = (Pane) rowPane.getParent();
+                toGoX += seat.getLayoutX();
+                toGoY += seat.getLayoutY();
+                toGoX += rowPane.getLayoutX();
+                toGoY += rowPane.getLayoutY();
+                toGoX += tablePane.getLayoutX();
+                toGoY += tablePane.getLayoutY();
+                toGoX += canteenAnchorPane.getLayoutX();
+                toGoY += canteenAnchorPane.getLayoutY();
+
+                System.out.println("Seat: " + seat.getId() + "coords" + toGoX + " " + toGoY);
+
+                int finalToGoX = toGoX;
+                int finalToGoY = toGoY;
+                Platform.runLater(() -> {
+                    clientsOnScene.compute(tableSeatDto.getId(), (id, image) -> {
+                        PathTransition pathTransition = new PathTransition();
+                        pathTransition.setDuration(Duration.millis(1000));
+                        pathTransition.setNode(image);
+                        pathTransition.setPath(new Polyline(image.getX(), image.getY(), finalToGoX, finalToGoY));
+                        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+                        pathTransition.play();
+                        image.setX(finalToGoX);
+                        image.setY(finalToGoY);
+
+                        return image;
+                    });
+                });
+            }
+        }, 0, 250, TimeUnit.MILLISECONDS);
     }
 
     @FXML

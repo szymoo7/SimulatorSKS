@@ -19,8 +19,14 @@ public class Client extends Thread {
     private CanteenManager resources;
 
     private List<Point> coordinatesForAnimation =  List.of(
-            new Point(1448,559),
-            new Point(1386, 550)
+            new Point(1365,559),
+            new Point(1288-37, 188-37),
+            new Point(1050, 100),
+            new Point(648,227),
+            new Point(236, 90),
+            new Point(825, 200),//l
+            new Point(509, 222),// p
+            new Point(800, 20)
     );
 
     public Client(CanteenManager resources) {
@@ -33,20 +39,16 @@ public class Client extends Thread {
     public void run() {
         resources.setClientToUpdate(new ClientDto(this.id,
                 coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
-        simulateAction(3000);
         resources.setClientToUpdate(new ClientDto(this.id,
                 coordinatesForAnimation.get(1).x, coordinatesForAnimation.get(1).y));
+        simulateAction(1000);
         joinQueue();
         while (status != ClientStatus.IN_QUEUE_TO_PAY) {
-            simulateAction(100);
+            simulateAction(1);
         }
         goToCounter();
         while (status != ClientStatus.LOOKING_FOR_SEAT) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            simulateAction(1);
         }
         try {
             goEating();
@@ -73,6 +75,19 @@ public class Client extends Thread {
         try {
             Line shortestLine = findShorterLine(resources.getLines());
             shortestLine.addClient(this);
+            if(shortestLine.getId() == 1) {
+                resources.setClientToUpdate(new ClientDto(this.id,
+                        coordinatesForAnimation.get(2).x, coordinatesForAnimation.get(2).y));
+                simulateAction(1000);
+            }
+            else {
+                resources.setClientToUpdate(new ClientDto(this.id,
+                        coordinatesForAnimation.get(3).x, coordinatesForAnimation.get(3).y));
+                simulateAction(1000);
+                resources.setClientToUpdate(new ClientDto(this.id,
+                        coordinatesForAnimation.get(4).x, coordinatesForAnimation.get(4).y));
+                simulateAction(1000);
+            }
             this.status = ClientStatus.IN_QUEUE;
             selectOrder();
         } catch (Exception e) {
@@ -83,6 +98,15 @@ public class Client extends Thread {
     private void goToCounter() {
         Line shortestLine = findShorterLine(resources.getToPayLines());
         shortestLine.addClient(this);
+        if(shortestLine.getId() == 3) {
+            resources.setClientToUpdate(new ClientDto(this.id,
+                    coordinatesForAnimation.get(5).x, coordinatesForAnimation.get(5).y));
+        }
+        else if(shortestLine.getId() == 4) {
+            resources.setClientToUpdate(new ClientDto(this.id,
+                    coordinatesForAnimation.get(6).x, coordinatesForAnimation.get(6).y));
+        }
+        simulateAction(1000);
     }
 
     public void setStatus(ClientStatus status) {
@@ -104,10 +128,12 @@ public class Client extends Thread {
     }
 
     private Seat findSeat(Table table) {
-        return table.getSeats()
+        Seat seat = table.getSeats()
                 .stream()
-                .filter(seat -> !seat.isOccupied())
+                .filter(s -> !s.isOccupied())
                 .findFirst().orElseThrow();
+        seat.setOccupied(true);
+        return seat;
     }
 
     private Table findTable() {
@@ -117,19 +143,26 @@ public class Client extends Thread {
                 .findFirst().orElseThrow();
     }
 
-    private void occupySeat(Seat seat) {
-        seat.setOccupied(true);
-    }
-
     private void goEating() throws InterruptedException {
-        Table table = findTable();
-        Seat seat = findSeat(table);
-        occupySeat(seat);
+        Seat currentSeat;
+        synchronized (resources) {
+            Table table = findTable();
+            currentSeat = findSeat(table);
+            resources.setTableSeatToUpdate(new TableSeatDto(this.id,
+                    table.getNumber(), currentSeat.getSeatNumber()));
+            System.out.println("\u001B[32mClient id: " + id + " is eating at table (" + table.getNumber() + ")\u001B[0m");
+        }
+
+        simulateAction(1000);
         this.status = ClientStatus.EATING;
-        System.out.println("\u001B[32mClient id: " + id + " is eating at table (" + table.getNumber() + ")\u001B[0m");
-        Thread.sleep(10_000);
-        seat.setOccupied(false);
+        simulateAction(10_000);
         this.status = ClientStatus.EXITING;
+        resources.setClientToUpdate(new ClientDto(this.id,
+                coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
+        simulateAction(1000);
+        resources.setClientToUpdate(new ClientDto(this.id,
+                null, null));
+        currentSeat.setOccupied(false);
         System.out.println("\u001B[32mClient id: " + id + " is leaving" + "\u001B[0m");
     }
 
@@ -141,4 +174,7 @@ public class Client extends Thread {
         }
     }
 
+    public ClientStatus getStatus() {
+        return status;
+    }
 }

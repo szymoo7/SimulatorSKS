@@ -19,25 +19,16 @@ public class CanteenManager {
     };
     static volatile List<Counter> counters = new ArrayList<>();
     static volatile List<Thread> threads = new ArrayList<>();
-    static volatile Queue<ClientDto> toUpdate = new ConcurrentLinkedQueue<>();
-    private volatile Queue<TableSeatDto> tableSeatToUpdate = new ConcurrentLinkedQueue<>();
     private volatile Queue<AnimationDto> animations = new ConcurrentLinkedQueue<>();
 
     private static volatile boolean isRunning = false;
-    private static double simulationSpeed = 1;
-    private static int nSeats = 3;
-    private static long clientEveryNSeconds = 1;
-
-
-    public CanteenManager(int clientEveryNSeconds, int nSeats) {
-        this.clientEveryNSeconds = clientEveryNSeconds;
-        this.nSeats = nSeats;
-
-    }
+    private static int nSeats = 4;
+    private long clientEveryNSeconds = 1;
+    private boolean leftCounterOpen = false;
+    private boolean rightCounterOpen = false;
 
     public CanteenManager() {
     }
-
 
     public void startSimulation() {
         clients.clear();
@@ -53,8 +44,12 @@ public class CanteenManager {
             c.start();
         }
 
-        counters.add(new Counter(this, true, new Line("Kolejka do kasy 1", 3)));
-        counters.add(new Counter(this, true, new Line("Kolejka do kasy 2", 4)));
+        if(rightCounterOpen) {
+            counters.add(new Counter(this, true, new Line("Kolejka do kasy 1", 3)));
+        }
+        if(leftCounterOpen) {
+            counters.add(new Counter(this, true, new Line("Kolejka do kasy 2", 4)));
+        }
         for(Counter c : counters) {
             c.start();
         }
@@ -76,13 +71,6 @@ public class CanteenManager {
         }
     }
 
-
-//    public static void main(String[] args) throws InterruptedException {
-//        CanteenManager canteenManager = new CanteenManager(1, 1);
-//        canteenManager.startSimulation();
-//    }
-
-
     public List<Line> getLines() {
         return lines;
     }
@@ -93,10 +81,6 @@ public class CanteenManager {
 
     public List<Table> getTables() {
         return tables;
-    }
-
-    public void setSimulationSpeed(int i) {
-        this.simulationSpeed = i;
     }
 
     public void setNSeats(int i) {
@@ -119,27 +103,23 @@ public class CanteenManager {
         return clients;
     }
 
-    public synchronized void setClientToUpdate(ClientDto client) {
-        toUpdate.add(client);
-    }
-
-    public synchronized ClientDto getClientToUpdate() {
-        return toUpdate.poll();
-    }
-
-    public synchronized TableSeatDto getTableSeatToUpdate() {
-        return tableSeatToUpdate.poll();
-    }
-
-    public synchronized void setTableSeatToUpdate(TableSeatDto tableSeat) {
-        tableSeatToUpdate.add(tableSeat);
-    }
-
     public void setAnimation(AnimationDto animationDto) {
         animations.add(animationDto);
     }
 
     public AnimationDto getAnimation() {
         return animations.poll();
+    }
+
+    public void setClientEveryNSeconds(long clientEveryNSeconds) {
+        this.clientEveryNSeconds = clientEveryNSeconds;
+    }
+
+    public void setLeftCounterOpen(boolean leftCounterOpen) {
+        this.leftCounterOpen = leftCounterOpen;
+    }
+
+    public void setRightCounterOpen(boolean rightCounterOpen) {
+        this.rightCounterOpen = rightCounterOpen;
     }
 }

@@ -26,7 +26,7 @@ public class Counter extends Thread {
                 }
             }
             try {
-                Thread.sleep(100); // Check the flag every 100ms
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;

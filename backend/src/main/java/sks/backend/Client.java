@@ -46,7 +46,6 @@ public class Client extends Thread {
             simulateAction(1000);
             joinQueue();
             goToCounter();
-            //Tu jest błąd, bo nie zawsze pierwsza osoba w kolejce idzie pierwsza do stolika
             goEating();
         }
 
@@ -86,13 +85,16 @@ public class Client extends Thread {
     }
 
     private void goToCounter() {
-        //TUTAJ!!!!
         while(status != ClientStatus.ORDERED) {
             simulateAction(1);
         }
         synchronized (resources) {
             resources.notifyAll();
             Line shortestLine = findShorterLine(resources.getToPayLines());
+            while(shortestLine ==  null) {
+                simulateAction(10);
+                shortestLine = findShorterLine(resources.getToPayLines());
+            }
             shortestLine.addClient(this);
             if(shortestLine.getId() == 3) {
                 resources.setAnimation(new AnimationDto(this.id,
@@ -122,8 +124,8 @@ public class Client extends Thread {
 
     private Line findShorterLine(List<Line> lines) {
         return lines.stream()
-                .min(Comparator.comparingInt(Line::getSize))
-                .orElseThrow();
+        .min(Comparator.comparingInt(Line::getSize))
+        .orElse(null);
     }
 
     public int id() {
@@ -136,25 +138,9 @@ public class Client extends Thread {
 
     //TODO: Reentrance lock?
     private void findAndTakeSeat() {
-//        while (currentSeat == null) {
-//            Table table = resources.getTables().stream()
-//                    .filter(t -> t.getSeats().stream().anyMatch(s -> !s.isOccupied()))
-//                    .findFirst()
-//                    .orElseThrow();
-//            Seat seat = table.getSeats().stream()
-//                    .filter(s -> !s.isOccupied())
-//                    .findFirst()
-//                    .orElseThrow();
-//            if(seat.setOccupied(true)) {
-//                currentSeat = seat;
-//                resources.setTableSeatToUpdate(new TableSeatDto(this.id,
-//                        table.getNumber(), seat.getSeatNumber()));
-//            }
-//        }
-//        simulateAction(1000);
         while (currentSeat == null) {
             synchronized(resources) {
-                resources.notifyAll();// Synchronize on the shared resource
+                resources.notifyAll();
                 Optional<Table> tableOpt = resources.getTables().stream()
                         .filter(t -> t.getSeats().stream().anyMatch(s -> !s.isOccupied()))
                         .findFirst();
@@ -171,12 +157,11 @@ public class Client extends Thread {
                             currentSeat = seat;
                             resources.setAnimation(new AnimationDto(this.id,
                                     table.getNumber(), seat.getSeatNumber(), true));
-                            break;  // Successfully got a seat, exit the while loop
+                            break;
                         }
                     }
                 }
             }
-            // If we didn't get a seat, wait a bit before trying again
             simulateAction(10);
         }
         simulateAction(1000);
@@ -185,7 +170,6 @@ public class Client extends Thread {
     private synchronized void leaveSeat() {
         while(currentSeat != null) {
             if(currentSeat.setOccupied(false)) {
-                System.out.println("Chuj kurwa jestem");
                 resources.setAnimation(new AnimationDto(this.id,
                         coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
                 simulateAction(1000);
@@ -202,7 +186,7 @@ public class Client extends Thread {
         }
         findAndTakeSeat();
         setStatus(ClientStatus.EATING);
-        simulateAction(50000);
+        simulateAction(10000);
         setStatus(ClientStatus.EXITING);
         leaveSeat();
         System.out.println("\u001B[32mClient id: " + id + " is leaving" + "\u001B[0m");

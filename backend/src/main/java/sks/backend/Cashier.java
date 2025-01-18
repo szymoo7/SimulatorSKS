@@ -24,15 +24,13 @@ public class Cashier extends Thread {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             if (toPayLine.getSize() > 0) {
-                Client current = null;
+                Client current;
                 synchronized(toPayLine) {
                     current = toPayLine.peekClient();
                     if (current != null) {
                         synchronized(current) {
-                            // Only proceed if client is in the right state
                             if (current.getStatus() == ClientStatus.IN_QUEUE_TO_PAY) {
                                 try {
-                                    // Set position before changing status
                                     if(toPayLine.getId() == 3) {
                                         resources.setAnimation(new AnimationDto(current.id(),
                                                 coordinatesForAnimation.get(0).x,
@@ -42,16 +40,12 @@ public class Cashier extends Thread {
                                                 coordinatesForAnimation.get(1).x,
                                                 coordinatesForAnimation.get(1).y));
                                     }
-//                                    Thread.sleep(5000);
 
                                     current.setStatus(ClientStatus.PAYING);
-                                    // Only remove from queue after successful status change
                                     toPayLine.removeClient();
 
-                                    // Release the locks while sleeping
                                     checkOut(current);
                                 } catch (InterruptedException e) {
-                                    // If interrupted during checkout, reset client status
                                     current.setStatus(ClientStatus.IN_QUEUE_TO_PAY);
                                     Thread.currentThread().interrupt();
                                     break;
@@ -61,8 +55,6 @@ public class Cashier extends Thread {
                     }
                 }
             }
-
-            // Small sleep to prevent busy waiting
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -77,8 +69,6 @@ public class Cashier extends Thread {
         if(current == null) {
             return null;
         }
-
-        // Synchronize on the client to ensure atomic status check and update
         synchronized(current) {
             if(current.getStatus() != ClientStatus.IN_QUEUE_TO_PAY) {
                 return null;
@@ -97,7 +87,7 @@ public class Cashier extends Thread {
     }
 
     private void checkOut(Client current) throws InterruptedException {
-        Thread.sleep(1000);
+        Thread.sleep(random.nextInt(1000, 5000));
 
         synchronized(current) {
             if (current.getStatus() == ClientStatus.PAYING) {

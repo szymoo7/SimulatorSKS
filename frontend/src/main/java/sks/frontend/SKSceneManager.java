@@ -34,6 +34,12 @@ public class SKSceneManager {
     @FXML
     private ToggleGroup toggleGroup;
 
+    /* ChoiceBoxes */
+    @FXML
+    private CheckBox leftCounterCheckBox;
+    @FXML
+    private CheckBox rightCounterCheckBox;
+
     /* ImageViews - Scene */
     @FXML
     private ImageView canteenImageView;
@@ -292,11 +298,12 @@ public class SKSceneManager {
 
     private Runnable generateClietsLambda = () -> {
         int numberOfClients = 0;
-        while(numberOfClients < 100) {
+        while(numberOfClients < 50) {
             simulationManager.generateClient();
+            System.out.println("Current clients on scene: " + numberOfClients);
             numberOfClients++;
             try {
-                Thread.sleep(500);
+                Thread.sleep(simulationManager.getClientEveryNSeconds() * 1000);
             } catch (InterruptedException e) {
                 System.out.println("Interrupting generating clients");
                 break;
@@ -317,7 +324,7 @@ public class SKSceneManager {
         simulationSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                simulationManager.setSimulationSpeed(newValue.intValue());
+                simulationManager.setClientEveryNSeconds(newValue.intValue());
             }
         });
 
@@ -350,6 +357,13 @@ public class SKSceneManager {
         startButton.setSelected(false);
         stopButton.setSelected(true);
 
+        leftCounterCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            simulationManager.setLeftCounterOpen(newValue);
+        });
+
+        rightCounterCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            simulationManager.setRightCounterOpen(newValue);
+        });
     }
 
     @FXML
@@ -359,7 +373,6 @@ public class SKSceneManager {
         currentGenerator.start();
 
 
-        //TODO: Zrobić kanał np. arrayliste gdzie przekazuje klientów i wspolrzedne do zaktualizowania
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(() -> {
             AnimationDto animation = simulationManager.getAnimation();
@@ -441,94 +454,10 @@ public class SKSceneManager {
 
                         return image;
                 });
-//            ClientDto current = simulationManager.getClientToUpdate();
-//            TableSeatDto tableSeatDto = simulationManager.getTableSeatToUpdate();
-//            if (current != null) {
-//                //System.out.println("Current client: " + current);
-//                Platform.runLater(() -> {
-//                    clientsOnScene.compute(current.getId(), (id, image) -> {
-//                        if (image == null) {
-//                            image = new ImageView(characterSkins.get(random.nextInt(characterSkins.size())));
-//                            canteenAnchorPane.getChildren().add(image);
-//                            image.setX(current.getX());
-//                            image.setFitHeight(75);
-//                            image.setFitWidth(75);
-//                            image.setY(current.getY());
-//                            image.setVisible(true);
-//                        }
-//                        else {
-//                            PathTransition pathTransition = new PathTransition();
-//                            pathTransition.setDuration(Duration.millis(1000));
-//                            pathTransition.setNode(image);
-//                            Integer toGoX = current.getX();
-//                            Integer toGoY = current.getY();
-//                            if(toGoX == null || toGoY == null) {
-//                                image.setVisible(false);
-//                                canteenAnchorPane.getChildren().remove(image);
-//                                return null;
-//                            }
-//                            pathTransition.setPath(new Polyline(image.getX(), image.getY(), toGoX, toGoY));
-//                            pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
-//                            pathTransition.play();
-//                            image.setX(current.getX());
-//                            image.setY(current.getY());
-//                        }
-//
-//                        return image;
-//                    });
-//                });
-//            }
-//            if(tableSeatDto != null) {
-//                System.out.println("Current table seat: " + tableSeatDto + " id = " + tableSeatDto.getId());
-//                int toGoX = 0;
-//                int toGoY = 0;
-//                ImageView seat = canteenAnchorPane.getChildren().stream()
-//                        .filter(node -> node instanceof Pane)
-//                        .flatMap(node -> ((Pane) node).getChildren().stream())
-//                        .filter(node -> node instanceof Pane)
-//                        .flatMap(node -> ((Pane) node).getChildren().stream())
-//                                .filter(node -> node instanceof ImageView)
-//                                        .map(node -> (ImageView) node)
-//                                                .filter(imageView -> imageView.getId().equals(tableSeatDto.getTableSeatId()))
-//                        .findFirst().orElseThrow();
-//
-//                Pane rowPane = (Pane) seat.getParent();
-//                Pane tablePane = (Pane) rowPane.getParent();
-//                toGoX += seat.getLayoutX();
-//                toGoY += seat.getLayoutY();
-//                toGoX += rowPane.getLayoutX();
-//                toGoY += rowPane.getLayoutY();
-//                toGoX += tablePane.getLayoutX();
-//                toGoY += tablePane.getLayoutY();
-//                toGoX += canteenAnchorPane.getLayoutX();
-//                toGoY += canteenAnchorPane.getLayoutY();
-//
-//                System.out.println("Seat: " + seat.getId() + "coords x = " + toGoX + " y = " + toGoY);
-//
-//                int finalToGoX = toGoX;
-//                int finalToGoY = toGoY;
-//                Platform.runLater(() -> {
-//                    clientsOnScene.compute(tableSeatDto.getId(), (id, image) -> {
-//                        pathTransition.setDuration(Duration.millis(1000));
-//                        pathTransition.setNode(image);
-//                        pathTransition.setPath(new Polyline(image.getX(), image.getY(), finalToGoX, finalToGoY));
-//                        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
-//                        pathTransition.setOnFinished(event -> {
-//                            System.out.println("Finished animation for client id: " + tableSeatDto.getId() + " table = " + tableSeatDto.getTable() + " seat = " + tableSeatDto.getSeat());
-//                        });
-//                        pathTransition.play();
-//                        image.setX(finalToGoX);
-//                        image.setY(finalToGoY);
-//
-//                        return image;
-//                    });
-//                });
-//            }
                     });
                 }
             }
-            System.out.println("Current clients on scene: " + clientsOnScene.size());
-        }, 0, 500, TimeUnit.MILLISECONDS);
+        }, 0, 100, TimeUnit.MILLISECONDS);
     }
 
     @FXML

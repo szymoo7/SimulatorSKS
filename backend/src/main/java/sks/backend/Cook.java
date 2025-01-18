@@ -40,11 +40,10 @@ public class Cook extends Thread {
                             coordinatesForAnimation.get(1).x, coordinatesForAnimation.get(1).y));
 
                 }
-                simulateAction(1100);
+                simulateAction(1000);
                 serveClient(current);
                 removeClient();
                 current.setStatus(ClientStatus.ORDERED);
-                //System.out.println("\u001B[32mClient id: " + current.id() + " has been served from " + name + "\u001B[0m");
             }
         }
     }
@@ -65,9 +64,8 @@ public class Cook extends Thread {
     }
 
     private void serveClient(Client current) {
-        //System.out.println("\u001B[32mClient id: " + current.id() + " is being served from " + name + "\u001B[0m");
         try {
-            Thread.sleep(1000);
+            Thread.sleep(random.nextInt(1000, 5000));
         } catch (InterruptedException e) {
             System.out.println("Cook was interrupted");
         }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.ToggleButton?>
@@ -16,7 +17,7 @@
             <Font name="Courier New" size="20.0" />
          </font>
       </Label>
-      <Label layoutX="1596.0" layoutY="152.0" text="Prędkość symulacji">
+      <Label layoutX="1509.0" layoutY="156.0" text="Interwał generowania klientów [s]">
          <font>
             <Font name="Courier New" size="20.0" />
          </font>
@@ -516,11 +517,24 @@
                </children>
             </Pane>
          </children></AnchorPane>
-      <ToggleButton fx:id="startButton" layoutX="1617.0" layoutY="313.0" mnemonicParsing="false" onAction="#onStartButtonClick" text="Start">
+      <ToggleButton fx:id="startButton" layoutX="1617.0" layoutY="352.0" mnemonicParsing="false" onAction="#onStartButtonClick" text="Start">
          <font>
-            <Font name="Consolas" size="12.0" />
+            <Font name="Consolas Bold" size="12.0" />
          </font>
       </ToggleButton>
-      <ToggleButton fx:id="stopButton" layoutX="1708.0" layoutY="323.0" mnemonicParsing="false" onAction="#onStopButtonClick" text="Stop" />
+      <ToggleButton fx:id="stopButton" layoutX="1743.0" layoutY="352.0" mnemonicParsing="false" onAction="#onStopButtonClick" prefHeight="22.0" prefWidth="49.0" text="Stop">
+         <font>
+            <Font name="Consolas Bold" size="12.0" />
+         </font></ToggleButton>
+      <CheckBox fx:id="leftCounterCheckBox" layoutX="1554.0" layoutY="313.0" mnemonicParsing="false" text="Lewa kasa otwarta">
+         <font>
+            <Font name="Consolas Bold" size="12.0" />
+         </font>
+      </CheckBox>
+      <CheckBox fx:id="rightCounterCheckBox" layoutX="1698.0" layoutY="313.0" mnemonicParsing="false" text="Prawa kasa otwarta">
+         <font>
+            <Font name="Consolas Bold" size="12.0" />
+         </font>
+      </CheckBox>
    </children>
 </AnchorPane>

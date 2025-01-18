@@ -292,11 +292,11 @@ public class SKSceneManager {
 
     private Runnable generateClietsLambda = () -> {
         int numberOfClients = 0;
-        while(numberOfClients < 10) {
+        while(numberOfClients < 100) {
             simulationManager.generateClient();
             numberOfClients++;
             try {
-                Thread.sleep(simulationManager.getClientEveryNSeconds() * 1000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 System.out.println("Interrupting generating clients");
                 break;
@@ -310,9 +310,9 @@ public class SKSceneManager {
 
     public void initialize() {
         tables.addAll(canteenAnchorPane.getChildren().stream()
-                .filter(node -> node instanceof Pane)
-                .map(node -> (Pane) node)
-                .toList());
+        .filter(node -> node instanceof Pane)
+        .map(node -> (Pane) node)
+        .toList());
 
         simulationSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
@@ -331,15 +331,14 @@ public class SKSceneManager {
                         .filter(node -> node instanceof Pane)
                         .map(node -> (Pane) node)
                         .toList();
-                for(int i = 0; i < tableObjects.size(); i++) {
+                for (int i = 0; i < tableObjects.size(); i++) {
                     tableToPane.put(tableObjects.get(i), tablePanes.get(i));
                 }
 
                 tables.forEach(table -> table.getChildren()
-                        .stream().limit(newValue.intValue())
                         .forEach(pairOfChairs -> {
-                            if(pairOfChairs instanceof Pane row) {
-                                row.setVisible(true);
+                            if (pairOfChairs instanceof Pane row) {
+                                row.setVisible(table.getChildren().indexOf(row) < newValue.intValue());
                             }
                         })
                 );
@@ -363,27 +362,71 @@ public class SKSceneManager {
         //TODO: Zrobić kanał np. arrayliste gdzie przekazuje klientów i wspolrzedne do zaktualizowania
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(() -> {
-            ClientDto current = simulationManager.getClientToUpdate();
-            TableSeatDto tableSeatDto = simulationManager.getTableSeatToUpdate();
-            if (current != null) {
-                //System.out.println("Current client: " + current);
-                Platform.runLater(() -> {
-                    clientsOnScene.compute(current.getId(), (id, image) -> {
-                        if (image == null) {
+            AnimationDto animation = simulationManager.getAnimation();
+            if(animation != null) {
+                if(animation.isForTable()) {
+                    System.out.println("Current table seat: " + animation + " id = " + animation.getId());
+                    int toGoX = 0;
+                    int toGoY = 0;
+                    ImageView seat = canteenAnchorPane.getChildren().stream()
+                            .filter(node -> node instanceof Pane)
+                            .flatMap(node -> ((Pane) node).getChildren().stream())
+                            .filter(node -> node instanceof Pane)
+                            .flatMap(node -> ((Pane) node).getChildren().stream())
+                                    .filter(node -> node instanceof ImageView)
+                                            .map(node -> (ImageView) node)
+                                                    .filter(imageView -> imageView.getId().equals(animation.getTableSeatId()))
+                            .findFirst().orElseThrow();
+
+                    Pane rowPane = (Pane) seat.getParent();
+                    Pane tablePane = (Pane) rowPane.getParent();
+                    toGoX += seat.getLayoutX();
+                    toGoY += seat.getLayoutY();
+                    toGoX += rowPane.getLayoutX();
+                    toGoY += rowPane.getLayoutY();
+                    toGoX += tablePane.getLayoutX();
+                    toGoY += tablePane.getLayoutY();
+                    toGoX += canteenAnchorPane.getLayoutX();
+                    toGoY += canteenAnchorPane.getLayoutY();
+
+                    System.out.println("Seat: " + seat.getId() + "coords x = " + toGoX + " y = " + toGoY);
+
+                    int finalToGoX = toGoX;
+                    int finalToGoY = toGoY;
+                    Platform.runLater(() -> {
+                        clientsOnScene.compute(animation.getId(), (id, image) -> {
+                            pathTransition.setDuration(Duration.millis(1000));
+                            pathTransition.setNode(image);
+                            pathTransition.setPath(new Polyline(image.getX(), image.getY(), finalToGoX, finalToGoY));
+                            pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+                            pathTransition.setOnFinished(event -> {
+                                System.out.println("Finished animation for client id: " + animation.getId() + " table = " + animation.getTable() + " seat = " + animation.getSeat());
+                            });
+                            pathTransition.play();
+                            image.setX(finalToGoX);
+                            image.setY(finalToGoY);
+
+                            return image;
+                        });
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        clientsOnScene.compute(animation.getId(), (id, image) -> {
+                            if (image == null) {
                             image = new ImageView(characterSkins.get(random.nextInt(characterSkins.size())));
                             canteenAnchorPane.getChildren().add(image);
-                            image.setX(current.getX());
+                            image.setX(animation.getX());
                             image.setFitHeight(75);
                             image.setFitWidth(75);
-                            image.setY(current.getY());
+                            image.setY(animation.getY());
                             image.setVisible(true);
                         }
                         else {
                             PathTransition pathTransition = new PathTransition();
                             pathTransition.setDuration(Duration.millis(1000));
                             pathTransition.setNode(image);
-                            Integer toGoX = current.getX();
-                            Integer toGoY = current.getY();
+                            Integer toGoX = animation.getX();
+                            Integer toGoY = animation.getY();
                             if(toGoX == null || toGoY == null) {
                                 image.setVisible(false);
                                 canteenAnchorPane.getChildren().remove(image);
@@ -392,59 +435,97 @@ public class SKSceneManager {
                             pathTransition.setPath(new Polyline(image.getX(), image.getY(), toGoX, toGoY));
                             pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
                             pathTransition.play();
-                            image.setX(current.getX());
-                            image.setY(current.getY());
+                            image.setX(animation.getX());
+                            image.setY(animation.getY());
                         }
 
                         return image;
-                    });
                 });
-            }
-            if(tableSeatDto != null) {
-                System.out.println("Current table seat: " + tableSeatDto + " id = " + tableSeatDto.getId());
-                int toGoX = 0;
-                int toGoY = 0;
-                ImageView seat = canteenAnchorPane.getChildren().stream()
-                        .filter(node -> node instanceof Pane)
-                        .flatMap(node -> ((Pane) node).getChildren().stream())
-                        .filter(node -> node instanceof Pane)
-                        .flatMap(node -> ((Pane) node).getChildren().stream())
-                                .filter(node -> node instanceof ImageView)
-                                        .map(node -> (ImageView) node)
-                                                .filter(imageView -> imageView.getId().equals(tableSeatDto.getTableSeatId()))
-                        .findFirst().orElseThrow();
-
-                Pane rowPane = (Pane) seat.getParent();
-                Pane tablePane = (Pane) rowPane.getParent();
-                toGoX += seat.getLayoutX();
-                toGoY += seat.getLayoutY();
-                toGoX += rowPane.getLayoutX();
-                toGoY += rowPane.getLayoutY();
-                toGoX += tablePane.getLayoutX();
-                toGoY += tablePane.getLayoutY();
-                toGoX += canteenAnchorPane.getLayoutX();
-                toGoY += canteenAnchorPane.getLayoutY();
-
-                System.out.println("Seat: " + seat.getId() + "coords x = " + toGoX + " y = " + toGoY);
-
-                int finalToGoX = toGoX;
-                int finalToGoY = toGoY;
-                Platform.runLater(() -> {
-                    clientsOnScene.compute(tableSeatDto.getId(), (id, image) -> {
-                        pathTransition.setDuration(Duration.millis(1000));
-                        pathTransition.setNode(image);
-                        pathTransition.setPath(new Polyline(image.getX(), image.getY(), finalToGoX, finalToGoY));
-                        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
-                        pathTransition.setOnFinished(event -> {
-                            System.out.println("Finished animation for client id: " + tableSeatDto.getId() + " table = " + tableSeatDto.getTable() + " seat = " + tableSeatDto.getSeat());
-                        });
-                        pathTransition.play();
-                        image.setX(finalToGoX);
-                        image.setY(finalToGoY);
-
-                        return image;
+//            ClientDto current = simulationManager.getClientToUpdate();
+//            TableSeatDto tableSeatDto = simulationManager.getTableSeatToUpdate();
+//            if (current != null) {
+//                //System.out.println("Current client: " + current);
+//                Platform.runLater(() -> {
+//                    clientsOnScene.compute(current.getId(), (id, image) -> {
+//                        if (image == null) {
+//                            image = new ImageView(characterSkins.get(random.nextInt(characterSkins.size())));
+//                            canteenAnchorPane.getChildren().add(image);
+//                            image.setX(current.getX());
+//                            image.setFitHeight(75);
+//                            image.setFitWidth(75);
+//                            image.setY(current.getY());
+//                            image.setVisible(true);
+//                        }
+//                        else {
+//                            PathTransition pathTransition = new PathTransition();
+//                            pathTransition.setDuration(Duration.millis(1000));
+//                            pathTransition.setNode(image);
+//                            Integer toGoX = current.getX();
+//                            Integer toGoY = current.getY();
+//                            if(toGoX == null || toGoY == null) {
+//                                image.setVisible(false);
+//                                canteenAnchorPane.getChildren().remove(image);
+//                                return null;
+//                            }
+//                            pathTransition.setPath(new Polyline(image.getX(), image.getY(), toGoX, toGoY));
+//                            pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+//                            pathTransition.play();
+//                            image.setX(current.getX());
+//                            image.setY(current.getY());
+//                        }
+//
+//                        return image;
+//                    });
+//                });
+//            }
+//            if(tableSeatDto != null) {
+//                System.out.println("Current table seat: " + tableSeatDto + " id = " + tableSeatDto.getId());
+//                int toGoX = 0;
+//                int toGoY = 0;
+//                ImageView seat = canteenAnchorPane.getChildren().stream()
+//                        .filter(node -> node instanceof Pane)
+//                        .flatMap(node -> ((Pane) node).getChildren().stream())
+//                        .filter(node -> node instanceof Pane)
+//                        .flatMap(node -> ((Pane) node).getChildren().stream())
+//                                .filter(node -> node instanceof ImageView)
+//                                        .map(node -> (ImageView) node)
+//                                                .filter(imageView -> imageView.getId().equals(tableSeatDto.getTableSeatId()))
+//                        .findFirst().orElseThrow();
+//
+//                Pane rowPane = (Pane) seat.getParent();
+//                Pane tablePane = (Pane) rowPane.getParent();
+//                toGoX += seat.getLayoutX();
+//                toGoY += seat.getLayoutY();
+//                toGoX += rowPane.getLayoutX();
+//                toGoY += rowPane.getLayoutY();
+//                toGoX += tablePane.getLayoutX();
+//                toGoY += tablePane.getLayoutY();
+//                toGoX += canteenAnchorPane.getLayoutX();
+//                toGoY += canteenAnchorPane.getLayoutY();
+//
+//                System.out.println("Seat: " + seat.getId() + "coords x = " + toGoX + " y = " + toGoY);
+//
+//                int finalToGoX = toGoX;
+//                int finalToGoY = toGoY;
+//                Platform.runLater(() -> {
+//                    clientsOnScene.compute(tableSeatDto.getId(), (id, image) -> {
+//                        pathTransition.setDuration(Duration.millis(1000));
+//                        pathTransition.setNode(image);
+//                        pathTransition.setPath(new Polyline(image.getX(), image.getY(), finalToGoX, finalToGoY));
+//                        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+//                        pathTransition.setOnFinished(event -> {
+//                            System.out.println("Finished animation for client id: " + tableSeatDto.getId() + " table = " + tableSeatDto.getTable() + " seat = " + tableSeatDto.getSeat());
+//                        });
+//                        pathTransition.play();
+//                        image.setX(finalToGoX);
+//                        image.setY(finalToGoY);
+//
+//                        return image;
+//                    });
+//                });
+//            }
                     });
-                });
+                }
             }
             System.out.println("Current clients on scene: " + clientsOnScene.size());
         }, 0, 500, TimeUnit.MILLISECONDS);

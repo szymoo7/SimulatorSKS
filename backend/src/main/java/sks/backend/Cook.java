@@ -31,12 +31,12 @@ public class Cook extends Thread {
             Client current = peekClient();
             if(current != null) {
                 if(line.getId() == 1) {
-                    resources.setClientToUpdate(new ClientDto(current.id(),
+                    resources.setAnimation(new AnimationDto(current.id(),
                             coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
 
                 }
                 else {
-                    resources.setClientToUpdate(new ClientDto(current.id(),
+                    resources.setAnimation(new AnimationDto(current.id(),
                             coordinatesForAnimation.get(1).x, coordinatesForAnimation.get(1).y));
 
                 }
@@ -67,16 +67,16 @@ public class Cook extends Thread {
     private void serveClient(Client current) {
         //System.out.println("\u001B[32mClient id: " + current.id() + " is being served from " + name + "\u001B[0m");
         try {
-            Thread.sleep(random.nextInt(3000, 8000));
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
-            //System.out.println("Cook was interrupted");
+            System.out.println("Cook was interrupted");
         }
     }
     private void simulateAction(long milis) {
         try {
             Thread.sleep(milis);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            System.out.println("Cook was interrupted");
         }
     }
 

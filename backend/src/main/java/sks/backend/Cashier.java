@@ -24,44 +24,85 @@ public class Cashier extends Thread {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             if (toPayLine.getSize() > 0) {
-                Client current = peekClient();
-                if (current != null) {
-                    try {
-                        checkOut(current);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        //System.out.println("Cashier was interrupted");
-                        break;
+                Client current = null;
+                synchronized(toPayLine) {
+                    current = toPayLine.peekClient();
+                    if (current != null) {
+                        synchronized(current) {
+                            // Only proceed if client is in the right state
+                            if (current.getStatus() == ClientStatus.IN_QUEUE_TO_PAY) {
+                                try {
+                                    // Set position before changing status
+                                    if(toPayLine.getId() == 3) {
+                                        resources.setAnimation(new AnimationDto(current.id(),
+                                                coordinatesForAnimation.get(0).x,
+                                                coordinatesForAnimation.get(0).y));
+                                    } else if (toPayLine.getId() == 4) {
+                                        resources.setAnimation(new AnimationDto(current.id(),
+                                                coordinatesForAnimation.get(1).x,
+                                                coordinatesForAnimation.get(1).y));
+                                    }
+//                                    Thread.sleep(5000);
+
+                                    current.setStatus(ClientStatus.PAYING);
+                                    // Only remove from queue after successful status change
+                                    toPayLine.removeClient();
+
+                                    // Release the locks while sleeping
+                                    checkOut(current);
+                                } catch (InterruptedException e) {
+                                    // If interrupted during checkout, reset client status
+                                    current.setStatus(ClientStatus.IN_QUEUE_TO_PAY);
+                                    Thread.currentThread().interrupt();
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
+            }
+
+            // Small sleep to prevent busy waiting
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
             }
         }
     }
 
     private Client peekClient() {
-        Client current = toPayLine.removeClient();
+        Client current = toPayLine.peekClient();
         if(current == null) {
             return null;
         }
-        if(current.getStatus() != ClientStatus.IN_QUEUE_TO_PAY) {
-            return null;
+
+        // Synchronize on the client to ensure atomic status check and update
+        synchronized(current) {
+            if(current.getStatus() != ClientStatus.IN_QUEUE_TO_PAY) {
+                return null;
+            }
+
+            if(toPayLine.getId() == 3) {
+                resources.setAnimation(new AnimationDto(current.id(),
+                        coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
+            } else if (toPayLine.getId() == 4) {
+                resources.setAnimation(new AnimationDto(current.id(),
+                        coordinatesForAnimation.get(1).x, coordinatesForAnimation.get(1).y));
+            }
+            current.setStatus(ClientStatus.PAYING);
         }
-        if(toPayLine.getId() == 3) {
-            resources.setClientToUpdate(new ClientDto(current.id(),
-                    coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
-        } else if (toPayLine.getId() == 4) {
-            resources.setClientToUpdate(new ClientDto(current.id(),
-                    coordinatesForAnimation.get(1).x, coordinatesForAnimation.get(1).y));
-        }
-        current.setStatus(ClientStatus.PAYING);
         return current;
     }
 
     private void checkOut(Client current) throws InterruptedException {
-        //System.out.println("\u001B[32mClient " + current.id() + " is paying at " + toPayLine.getName() + "\u001B[0m");
-        Thread.sleep(5000);
-        //System.out.println("\u001B[34mClient " + current.id() + " has paid at " + toPayLine.getName() + "\u001B[0m");
-        current.setStatus(ClientStatus.LOOKING_FOR_SEAT);
-    }
+        Thread.sleep(1000);
 
+        synchronized(current) {
+            if (current.getStatus() == ClientStatus.PAYING) {
+                current.setStatus(ClientStatus.LOOKING_FOR_SEAT);
+            }
+        }
+    }
 }

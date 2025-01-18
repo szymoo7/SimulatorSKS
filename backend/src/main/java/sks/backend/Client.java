@@ -38,24 +38,18 @@ public class Client extends Thread {
 
     @Override
     public void run() {
-        resources.setClientToUpdate(new ClientDto(this.id,
-                coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
-        resources.setClientToUpdate(new ClientDto(this.id,
-                coordinatesForAnimation.get(1).x, coordinatesForAnimation.get(1).y));
-        simulateAction(1000);
-        joinQueue();
-        goToCounter();
-        //Tu jest błąd, bo nie zawsze pierwsza osoba w kolejce idzie pierwsza do stolika
-        try {
+        while(true) {
+            resources.setAnimation(new AnimationDto(this.id,
+                    coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
+            resources.setAnimation(new AnimationDto(this.id,
+                    coordinatesForAnimation.get(1).x, coordinatesForAnimation.get(1).y));
+            simulateAction(1000);
+            joinQueue();
+            goToCounter();
+            //Tu jest błąd, bo nie zawsze pierwsza osoba w kolejce idzie pierwsza do stolika
             goEating();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
-        try {
-            this.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
@@ -72,15 +66,15 @@ public class Client extends Thread {
             Line shortestLine = findShorterLine(resources.getLines());
             shortestLine.addClient(this);
             if(shortestLine.getId() == 1) {
-                resources.setClientToUpdate(new ClientDto(this.id,
+                resources.setAnimation(new AnimationDto(this.id,
                         coordinatesForAnimation.get(2).x, coordinatesForAnimation.get(2).y));
                 simulateAction(1000);
             }
             else {
-                resources.setClientToUpdate(new ClientDto(this.id,
+                resources.setAnimation(new AnimationDto(this.id,
                         coordinatesForAnimation.get(3).x, coordinatesForAnimation.get(3).y));
                 simulateAction(1000);
-                resources.setClientToUpdate(new ClientDto(this.id,
+                resources.setAnimation(new AnimationDto(this.id,
                         coordinatesForAnimation.get(4).x, coordinatesForAnimation.get(4).y));
                 simulateAction(1000);
             }
@@ -101,19 +95,28 @@ public class Client extends Thread {
             Line shortestLine = findShorterLine(resources.getToPayLines());
             shortestLine.addClient(this);
             if(shortestLine.getId() == 3) {
-                resources.setClientToUpdate(new ClientDto(this.id,
+                resources.setAnimation(new AnimationDto(this.id,
                         coordinatesForAnimation.get(5).x, coordinatesForAnimation.get(5).y));
             }
             else if(shortestLine.getId() == 4) {
-                resources.setClientToUpdate(new ClientDto(this.id,
+                resources.setAnimation(new AnimationDto(this.id,
                         coordinatesForAnimation.get(6).x, coordinatesForAnimation.get(6).y));
             }
+            this.status = ClientStatus.IN_QUEUE_TO_PAY;
         }
-        this.status = ClientStatus.IN_QUEUE_TO_PAY;
         simulateAction(1000);
+
+
+        while(true) {
+            if(status == ClientStatus.LOOKING_FOR_SEAT) {
+                break;
+            }
+            simulateAction(10);
+        }
     }
 
     public void setStatus(ClientStatus status) {
+        System.out.println("Client " + id + " status changing from " + this.status + " to " + status);
         this.status = status;
     }
 
@@ -132,21 +135,49 @@ public class Client extends Thread {
     }
 
     //TODO: Reentrance lock?
-    private synchronized void findAndTakeSeat() {
+    private void findAndTakeSeat() {
+//        while (currentSeat == null) {
+//            Table table = resources.getTables().stream()
+//                    .filter(t -> t.getSeats().stream().anyMatch(s -> !s.isOccupied()))
+//                    .findFirst()
+//                    .orElseThrow();
+//            Seat seat = table.getSeats().stream()
+//                    .filter(s -> !s.isOccupied())
+//                    .findFirst()
+//                    .orElseThrow();
+//            if(seat.setOccupied(true)) {
+//                currentSeat = seat;
+//                resources.setTableSeatToUpdate(new TableSeatDto(this.id,
+//                        table.getNumber(), seat.getSeatNumber()));
+//            }
+//        }
+//        simulateAction(1000);
         while (currentSeat == null) {
-            Table table = resources.getTables().stream()
-                    .filter(t -> t.getSeats().stream().anyMatch(s -> !s.isOccupied()))
-                    .findFirst()
-                    .orElseThrow();
-            Seat seat = table.getSeats().stream()
-                    .filter(s -> !s.isOccupied())
-                    .findFirst()
-                    .orElseThrow();
-            if(seat.setOccupied(true)) {
-                currentSeat = seat;
-                resources.setTableSeatToUpdate(new TableSeatDto(this.id,
-                        table.getNumber(), seat.getSeatNumber()));
+            synchronized(resources) {
+                resources.notifyAll();// Synchronize on the shared resource
+                Optional<Table> tableOpt = resources.getTables().stream()
+                        .filter(t -> t.getSeats().stream().anyMatch(s -> !s.isOccupied()))
+                        .findFirst();
+
+                if (tableOpt.isPresent()) {
+                    Table table = tableOpt.get();
+                    Optional<Seat> seatOpt = table.getSeats().stream()
+                            .filter(s -> !s.isOccupied())
+                            .findFirst();
+
+                    if (seatOpt.isPresent()) {
+                        Seat seat = seatOpt.get();
+                        if(seat.setOccupied(true)) {
+                            currentSeat = seat;
+                            resources.setAnimation(new AnimationDto(this.id,
+                                    table.getNumber(), seat.getSeatNumber(), true));
+                            break;  // Successfully got a seat, exit the while loop
+                        }
+                    }
+                }
             }
+            // If we didn't get a seat, wait a bit before trying again
+            simulateAction(10);
         }
         simulateAction(1000);
     }
@@ -155,24 +186,24 @@ public class Client extends Thread {
         while(currentSeat != null) {
             if(currentSeat.setOccupied(false)) {
                 System.out.println("Chuj kurwa jestem");
-                resources.setClientToUpdate(new ClientDto(this.id,
+                resources.setAnimation(new AnimationDto(this.id,
                         coordinatesForAnimation.get(0).x, coordinatesForAnimation.get(0).y));
                 simulateAction(1000);
-                resources.setClientToUpdate(new ClientDto(this.id,
+                resources.setAnimation(new AnimationDto(this.id,
                         null, null));
                 currentSeat = null;
             }
         }
     }
 
-    private void goEating() throws InterruptedException {
+    private void goEating() {
         while (status != ClientStatus.LOOKING_FOR_SEAT) {
-            simulateAction(1);
+            simulateAction(10);
         }
         findAndTakeSeat();
-        this.status = ClientStatus.EATING;
-        simulateAction(10000);
-        this.status = ClientStatus.EXITING;
+        setStatus(ClientStatus.EATING);
+        simulateAction(50000);
+        setStatus(ClientStatus.EXITING);
         leaveSeat();
         System.out.println("\u001B[32mClient id: " + id + " is leaving" + "\u001B[0m");
     }

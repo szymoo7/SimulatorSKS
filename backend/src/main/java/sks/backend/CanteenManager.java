@@ -21,10 +21,11 @@ public class CanteenManager {
     static volatile List<Thread> threads = new ArrayList<>();
     static volatile Queue<ClientDto> toUpdate = new ConcurrentLinkedQueue<>();
     private volatile Queue<TableSeatDto> tableSeatToUpdate = new ConcurrentLinkedQueue<>();
+    private volatile Queue<AnimationDto> animations = new ConcurrentLinkedQueue<>();
 
     private static volatile boolean isRunning = false;
     private static double simulationSpeed = 1;
-    private static int nSeats = 1;
+    private static int nSeats = 3;
     private static long clientEveryNSeconds = 1;
 
 
@@ -132,5 +133,13 @@ public class CanteenManager {
 
     public synchronized void setTableSeatToUpdate(TableSeatDto tableSeat) {
         tableSeatToUpdate.add(tableSeat);
+    }
+
+    public void setAnimation(AnimationDto animationDto) {
+        animations.add(animationDto);
+    }
+
+    public AnimationDto getAnimation() {
+        return animations.poll();
     }
 }
